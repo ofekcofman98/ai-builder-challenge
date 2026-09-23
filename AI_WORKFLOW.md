@@ -20,6 +20,28 @@ Entry format:
 
 ---
 
+## 2026-09-24 — Inline email capture on partialResult, no intermediate screen
+
+**Decision:** the baseline post-quiz email gate is no longer a separate `emailGate`
+screen reached via a "See your full score" button. The email field renders inline at
+the bottom of `partialResult`, and submitting it advances straight to `fullResult`. The
+standalone `emailGate` screen still exists (extracted into a shared `emailForm()`
+helper) for the two paths with no result content to merge into: a gate firing mid-quiz
+(Test 1) and a gate firing before a full, ungated reveal.
+
+**Considered:** keeping the separate screen and CTA as originally built.
+
+**Why:** Result -> Account is the steepest drop-off in the funnel model (write-up.md),
+so an unearned extra click on it directly opposes the flow's own stated priority. Step-
+level measurement isn't lost — `result_viewed` and `account_created` still fire as
+distinct events at the same points, just without a screen boundary between them.
+
+**AI's role:** user identified the friction and specified the fix directly; Claude
+implemented it, including refactoring the duplicated form markup into one helper so the
+two remaining standalone-emailGate code paths didn't drift from the inline version.
+
+---
+
 ## 2026-09-24 — State machine: resolver function, not an index walk
 
 **Decision:** `state.js`'s screen transitions are computed by a pure `resolveNextScreen()`
