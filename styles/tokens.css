@@ -1,0 +1,61 @@
+/*
+  tokens.css — the ONLY place colors, spacing, and typography are defined.
+  base.css and components.css must reference these custom properties, never
+  hardcode a value. This is what lets a Part 2 variant restyle a single element
+  (e.g. CTA color for an urgency test) without touching layout files.
+*/
+
+:root {
+  /* Color — neutral, trust-forward palette. No monetary/price cues (see
+     write-up.md: early $ signage was an observed trust-signal failure). */
+  --color-bg: #ffffff;
+  --color-surface: #f6f7fb;
+  --color-text: #12131a;
+  --color-text-muted: #5a5f72;
+  --color-primary: #3d5afe;
+  --color-primary-hover: #2e46e0;
+  --color-primary-contrast: #ffffff;
+  --color-success: #1fa97a;
+  --color-border: #e2e4ec;
+  --color-progress-track: #e2e4ec;
+  --color-progress-fill: #3d5afe;
+  --color-toast-bg: #12131a;
+  --color-toast-text: #ffffff;
+
+  /* Spacing scale — 4px base unit */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+  --space-8: 64px;
+
+  /* Typography */
+  --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-size-sm: 0.875rem;
+  --font-size-base: 1rem;
+  --font-size-lg: 1.25rem;
+  --font-size-xl: 1.75rem;
+  --font-size-xxl: 2.25rem;
+  --line-height-base: 1.5;
+  --line-height-tight: 1.2;
+  --font-weight-regular: 400;
+  --font-weight-medium: 600;
+  --font-weight-bold: 700;
+
+  /* Shape */
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-pill: 999px;
+
+  /* Motion */
+  --duration-fast: 150ms;
+  --duration-base: 300ms;
+  --duration-toast: 3000ms; /* mirrors CONFIG.feedback.autoDismissMs default */
+
+  /* Layout */
+  --content-max-width: 480px; /* mobile-first: single reading column even on desktop */
+  --tap-target-min: 44px;
+}

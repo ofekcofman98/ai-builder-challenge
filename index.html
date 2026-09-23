@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+  <title>IQly — Discover Your IQ Score</title>
+
+  <link rel="stylesheet" href="styles/tokens.css" />
+  <link rel="stylesheet" href="styles/base.css" />
+  <link rel="stylesheet" href="styles/components.css" />
+</head>
+<body>
+  <div id="app"></div>
+
+  <!-- Load order matters: config/content/logic before render, render before init. -->
+  <script src="src/config.js"></script>
+  <script src="src/questions.js"></script>
+  <script src="src/scoring.js"></script>
+  <script src="src/tracking.js"></script>
+  <script src="src/state.js"></script>
+  <script src="src/screens.js"></script>
+  <script src="src/render.js"></script>
+  <script src="src/main.js"></script>
+</body>
+</html>

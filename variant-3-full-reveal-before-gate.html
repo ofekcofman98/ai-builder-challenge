@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+  <title>IQly — Variant 3: Full Reveal Before Gate</title>
+
+  <link rel="stylesheet" href="styles/tokens.css" />
+  <link rel="stylesheet" href="styles/base.css" />
+  <link rel="stylesheet" href="styles/components.css" />
+</head>
+<body>
+  <div id="app"></div>
+
+  <script src="src/config.js"></script>
+  <script src="src/questions.js"></script>
+  <script src="src/scoring.js"></script>
+  <script src="src/tracking.js"></script>
+  <script src="src/state.js"></script>
+  <script src="src/screens.js"></script>
+  <script src="src/render.js"></script>
+
+  <script>
+    // TEST 3 — funnel step: result screen -> account creation.
+    // Hypothesis (placeholder, to be finalized in Part 2 write-up): showing
+    // the full score/percentile before the gate (vs. the partial-reveal
+    // curiosity-gap baseline) may convert better for users who dislike a
+    // paywall-feeling ask before seeing what they "earned".
+    IQLY.CONFIG.result.revealMode = 'full';
+    IQLY.CONFIG.emailGate.position = 'afterResult';
+    IQLY.CONFIG.tracking.variantId = 'variant-3-full-reveal-before-gate';
+  </script>
+
+  <script src="src/main.js"></script>
+</body>
+</html>

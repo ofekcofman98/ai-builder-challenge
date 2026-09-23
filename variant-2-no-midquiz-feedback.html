@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+  <title>IQly — Variant 2: No Mid-Quiz Feedback</title>
+
+  <link rel="stylesheet" href="styles/tokens.css" />
+  <link rel="stylesheet" href="styles/base.css" />
+  <link rel="stylesheet" href="styles/components.css" />
+</head>
+<body>
+  <div id="app"></div>
+
+  <script src="src/config.js"></script>
+  <script src="src/questions.js"></script>
+  <script src="src/scoring.js"></script>
+  <script src="src/tracking.js"></script>
+  <script src="src/state.js"></script>
+  <script src="src/screens.js"></script>
+  <script src="src/render.js"></script>
+
+  <script>
+    // TEST 2 — funnel step: quiz start -> quiz completion.
+    // Hypothesis (placeholder, to be finalized in Part 2 write-up): the
+    // percentile toasts are a distraction cost, not a retention lift, for
+    // this audience — removing them may reduce mid-quiz drop-off.
+    IQLY.CONFIG.feedback.toastsAfterQuestion = {};
+    IQLY.CONFIG.tracking.variantId = 'variant-2-no-midquiz-feedback';
+  </script>
+
+  <script src="src/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,57 @@
+/*
+  base.css — reset + mobile-first element defaults.
+  Authored at phone width first; widened only via min-width media queries,
+  per CLAUDE.md. Never a desktop layout scaled down.
+*/
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-family);
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-base);
+  color: var(--color-text);
+  background: var(--color-bg);
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+  min-height: 100dvh; /* avoids mobile browser chrome jump on quiz screens */
+}
+
+h1, h2, h3, p {
+  margin: 0;
+}
+
+button {
+  font-family: inherit;
+  font-size: inherit;
+  cursor: pointer;
+}
+
+input {
+  font-family: inherit;
+  font-size: inherit;
+}
+
+#app {
+  width: 100%;
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Desktop: the flow stays a single centered column rather than stretching
+   wide — a quiz reads like a quiz, not a dashboard, on any screen size. */
+@media (min-width: 768px) {
+  #app {
+    max-width: var(--content-max-width);
+    margin: 0 auto;
+  }
+}

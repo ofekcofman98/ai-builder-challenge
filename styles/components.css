@@ -1,0 +1,98 @@
+/*
+  components.css — reusable UI primitives: buttons, cards, progress bar,
+  toast, form field. Screen-specific one-off layout lives in screens.js
+  inline via classes defined here, not new ad-hoc styles per screen.
+*/
+
+.screen {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: var(--space-5) var(--space-4);
+  gap: var(--space-5);
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--tap-target-min);
+  padding: var(--space-3) var(--space-5);
+  border: none;
+  border-radius: var(--radius-pill);
+  font-weight: var(--font-weight-medium);
+  transition: background var(--duration-fast) ease;
+}
+
+.btn-primary {
+  background: var(--color-primary);
+  color: var(--color-primary-contrast);
+  width: 100%;
+}
+
+.btn-primary:hover {
+  background: var(--color-primary-hover);
+}
+
+.card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-5);
+}
+
+/* Progress bar — endowed progress effect starts pre-filled
+   (see CONFIG.progress.initialPercent). */
+.progress-track {
+  width: 100%;
+  height: var(--space-2);
+  background: var(--color-progress-track);
+  border-radius: var(--radius-pill);
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: var(--color-progress-fill);
+  border-radius: var(--radius-pill);
+  transition: width var(--duration-base) ease;
+}
+
+/* Toast — non-blocking mid-quiz feedback. Slides in above the question,
+   never overlays answer options (write-up.md: competitor pattern). */
+.toast {
+  position: fixed;
+  top: var(--space-4);
+  left: 50%;
+  transform: translate(-50%, -150%);
+  background: var(--color-toast-bg);
+  color: var(--color-toast-text);
+  padding: var(--space-3) var(--space-5);
+  border-radius: var(--radius-pill);
+  font-size: var(--font-size-sm);
+  transition: transform var(--duration-base) ease;
+  z-index: 10;
+}
+
+.toast.is-visible {
+  transform: translate(-50%, 0);
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.field input {
+  min-height: var(--tap-target-min);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-bg);
+  color: var(--color-text);
+}
+
+.text-muted {
+  color: var(--color-text-muted);
+}
