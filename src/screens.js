@@ -36,6 +36,19 @@ function optionButton(action, index, label) {
     '" data-value="' + index + '">' + escapeHtml(label) + '</button>';
 }
 
+// Small inline-SVG mark for the entry hero — three overlapping shapes,
+// echoing the pattern-recognition question type without being a mascot
+// (write-up.md rules those out). Inline, no asset file, no CDN.
+function heroMark() {
+  return (
+    '<svg class="entry-icon" viewBox="0 0 64 64" width="48" height="48" aria-hidden="true">' +
+      '<circle cx="24" cy="24" r="14" fill="var(--color-primary)" opacity="0.85"/>' +
+      '<rect x="30" y="30" width="24" height="24" rx="4" fill="var(--color-primary)" opacity="0.55"/>' +
+      '<polygon points="16,52 28,52 22,40" fill="var(--color-primary)" opacity="0.7"/>' +
+    '</svg>'
+  );
+}
+
 // Shared by the emailGate screen (mid-quiz / full-reveal-before-result
 // paths) and the inline field on partialResult (baseline path) — same
 // markup, same data-role hooks, so render.js's handleEmailSubmit() works
@@ -59,23 +72,28 @@ IQLY.screens = {
   entry: function () {
     var copy = IQLY.CONFIG.copy.entry;
     var q0 = IQLY.SOFT_ENTRY_QUESTION;
-    // 0% pre-answer — see state.getProgressPercent() for why the bump is
-    // gated on a real action rather than shown up front.
-    var percent = IQLY.state.getProgressPercent();
 
     var options = q0.options.map(function (opt, i) {
       return optionButton('soft-entry', i, opt);
     }).join('');
 
     return (
+      // No progress bar here — it's always 0% pre-answer (no information
+      // value) and its presence made this screen read as "question 1 of
+      // 8" instead of a landing moment. It appears from the first real
+      // quiz screen onward instead (state.getProgressPercent()).
       '<div class="screen screen-entry">' +
-        progressBar(percent) +
-        '<div>' +
+        '<div class="entry-hero">' +
+          heroMark() +
           '<h1>' + escapeHtml(copy.headline) + '</h1>' +
           '<p class="text-muted">' + escapeHtml(copy.subheadline) + '</p>' +
+          '<p class="text-muted trust-cue">' + escapeHtml(copy.trustCue) + '</p>' +
         '</div>' +
-        '<p class="text-muted trust-cue">' + escapeHtml(copy.trustCue) + '</p>' +
-        '<div class="field">' +
+        // Q0 sits in its own card, visually separated from the hero above
+        // it, so it reads as "the quiz is about to begin" rather than
+        // being indistinguishable from the hero copy — while still being
+        // the de facto CTA (no separate Start button).
+        '<div class="card entry-question-card">' +
           '<p class="question-prompt">' + escapeHtml(q0.prompt) + '</p>' +
           '<div class="option-list">' + options + '</div>' +
         '</div>' +
