@@ -36,11 +36,32 @@ function optionButton(action, index, label) {
     '" data-value="' + index + '">' + escapeHtml(label) + '</button>';
 }
 
+// Shared by the emailGate screen (mid-quiz / full-reveal-before-result
+// paths) and the inline field on partialResult (baseline path) — same
+// markup, same data-role hooks, so render.js's handleEmailSubmit() works
+// unmodified regardless of which screen it's rendered into.
+function emailForm(copy) {
+  return (
+    '<form class="field" data-role="email-form">' +
+      '<input type="email" name="email" placeholder="' + escapeHtml(copy.emailPlaceholder) +
+        '" data-role="email-input" autocomplete="email" required />' +
+      '<p class="field-error text-muted" data-role="email-error" hidden>' +
+        escapeHtml(copy.invalidEmail) +
+      '</p>' +
+      '<button class="btn btn-primary" type="button" data-action="submit-email">' +
+        escapeHtml(copy.cta) +
+      '</button>' +
+    '</form>'
+  );
+}
+
 IQLY.screens = {
   entry: function () {
     var copy = IQLY.CONFIG.copy.entry;
     var q0 = IQLY.SOFT_ENTRY_QUESTION;
-    var percent = IQLY.CONFIG.progress.initialPercent;
+    // 0% pre-answer — see state.getProgressPercent() for why the bump is
+    // gated on a real action rather than shown up front.
+    var percent = IQLY.state.getProgressPercent();
 
     var options = q0.options.map(function (opt, i) {
       return optionButton('soft-entry', i, opt);
@@ -88,8 +109,14 @@ IQLY.screens = {
           '<span class="question-label text-muted">' + escapeHtml(label) + '</span>' +
           streakChip +
         '</div>' +
-        '<p class="question-prompt">' + escapeHtml(question.prompt) + '</p>' +
-        (visual ? '<div class="question-visual">' + visual + '</div>' : '') +
+        // Fixed-min-height wrapper: prompt length and visual-vs-no-visual
+        // both vary per question, and without a reserved height the option
+        // buttons below would shift position between questions — a real
+        // mis-tap risk on mobile, not just a visual nicety.
+        '<div class="question-content">' +
+          '<p class="question-prompt">' + escapeHtml(question.prompt) + '</p>' +
+          (visual ? '<div class="question-visual">' + visual + '</div>' : '') +
+        '</div>' +
         '<div class="option-list">' + options + '</div>' +
       '</div>'
     );
@@ -113,6 +140,7 @@ IQLY.screens = {
 
   partialResult: function () {
     var copy = IQLY.CONFIG.copy.partialResult;
+    var gateCopy = IQLY.CONFIG.copy.emailGate;
     var result = IQLY.state.getResult();
     var standoutLabel = result.standout
       ? result.standout.charAt(0).toUpperCase() + result.standout.slice(1)
@@ -140,13 +168,22 @@ IQLY.screens = {
           '<span class="score-locked-value">???</span>' +
         '</div>' +
         '<p class="trust-badge text-muted">' + escapeHtml(copy.trustBadge) + '</p>' +
-        '<button class="btn btn-primary" type="button" data-action="continue">' +
-          escapeHtml(copy.cta) +
-        '</button>' +
+        // Email captured inline, right here — this is the steepest
+        // modeled drop-off in the funnel (write-up.md: Result -> Account),
+        // so it doesn't earn an extra click through an intermediate screen.
+        '<div class="inline-gate">' +
+          '<h2>' + escapeHtml(gateCopy.headline) + '</h2>' +
+          '<p class="text-muted">' + escapeHtml(gateCopy.subheadline) + '</p>' +
+          emailForm(gateCopy) +
+        '</div>' +
       '</div>'
     );
   },
 
+  // Still used for a gate that fires mid-quiz (Test 1) or before a full,
+  // ungated reveal — those cases have no result content to merge into, so
+  // they keep this as a standalone screen. The baseline post-quiz gate is
+  // inlined into partialResult instead (see above).
   emailGate: function () {
     var copy = IQLY.CONFIG.copy.emailGate;
 
@@ -156,16 +193,7 @@ IQLY.screens = {
           '<h1>' + escapeHtml(copy.headline) + '</h1>' +
           '<p class="text-muted">' + escapeHtml(copy.subheadline) + '</p>' +
         '</div>' +
-        '<form class="field" data-role="email-form">' +
-          '<input type="email" name="email" placeholder="' + escapeHtml(copy.emailPlaceholder) +
-            '" data-role="email-input" autocomplete="email" required />' +
-          '<p class="field-error text-muted" data-role="email-error" hidden>' +
-            escapeHtml(copy.invalidEmail) +
-          '</p>' +
-          '<button class="btn btn-primary" type="button" data-action="submit-email">' +
-            escapeHtml(copy.cta) +
-          '</button>' +
-        '</form>' +
+        emailForm(copy) +
       '</div>'
     );
   },

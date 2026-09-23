@@ -151,6 +151,17 @@
   justify-content: space-between;
 }
 
+/* Reserves consistent vertical space regardless of prompt length or
+   whether this question has a visual, so the option buttons below never
+   shift position between questions (see screens.js quiz()). */
+.question-content {
+  min-height: 168px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: var(--space-4);
+}
+
 .question-prompt {
   font-size: var(--font-size-lg);
   font-weight: var(--font-weight-medium);
@@ -247,6 +258,17 @@
 .trust-badge {
   font-size: var(--font-size-sm);
   text-align: center;
+}
+
+/* Inline email capture on partialResult — visually separated from the
+   result teaser above it since it's a distinct ask, but on the same
+   screen: no intermediate click on the funnel's steepest drop-off. */
+.inline-gate {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding-top: var(--space-5);
+  border-top: 1px solid var(--color-border);
 }
 
 /* Category breakdown — shared by partial and full result screens */

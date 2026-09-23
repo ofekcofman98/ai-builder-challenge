@@ -104,11 +104,6 @@ var IQLY = window.IQLY || {};
     mount();
   }
 
-  function handleContinue() {
-    IQLY.state.advance();
-    mount();
-  }
-
   function handleEmailSubmit() {
     var input = document.querySelector('[data-role="email-input"]');
     var errorEl = document.querySelector('[data-role="email-error"]');
@@ -155,7 +150,6 @@ var IQLY = window.IQLY || {};
 
     if (action === 'soft-entry') handleSoftEntry(value);
     else if (action === 'answer') handleAnswer(value);
-    else if (action === 'continue') handleContinue();
     else if (action === 'submit-email') handleEmailSubmit();
     else if (action === 'share') handleShare();
   }

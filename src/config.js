@@ -93,7 +93,9 @@ IQLY.CONFIG = {
     },
     partialResult: {
       standoutLabel: 'Your Standout Strength',
-      cta: 'See your full score and percentile',
+      // No separate CTA copy: the email field is inline on this screen
+      // (copy.emailGate.headline/cta double as its own copy) — no
+      // intermediate click on the steepest modeled funnel drop-off.
       trustBadge: 'Scored using a validated cognitive-assessment methodology',
     },
     emailGate: {

@@ -91,7 +91,9 @@ IQLY.state = (function () {
         return 'partialResult';
 
       case 'partialResult':
-        return current.emailCaptured ? 'fullResult' : 'emailGate';
+        // The email field is inline on this screen now (no separate
+        // emailGate click) — stays put until email is actually captured.
+        return current.emailCaptured ? 'fullResult' : 'partialResult';
 
       case 'fullResult':
         // Reached ungated (full reveal + afterResult position): the gate
@@ -129,10 +131,18 @@ IQLY.state = (function () {
   }
 
   function getProgressPercent() {
-    var total = questionCount();
     var answered = current.answers.length;
+    // 0% until the user has actually done something — the endowed-progress
+    // bump has to follow a real action, not precede it, or it reads as
+    // "I already started" on a screen the user hasn't engaged with yet.
+    if (answered === 0) return 0;
+
+    var total = questionCount();
     var base = IQLY.CONFIG.progress.initialPercent;
-    var earned = (100 - base) * (answered / total);
+    // Jumps to exactly `base` right after question 1, then scales linearly
+    // so the bar lands on exactly 100% at the last question.
+    var span = Math.max(total - 1, 1);
+    var earned = (100 - base) * ((answered - 1) / span);
     return Math.round(base + earned);
   }
 
