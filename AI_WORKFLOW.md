@@ -20,6 +20,33 @@ Entry format:
 
 ---
 
+## 2026-09-24 — State machine: resolver function, not an index walk
+
+**Decision:** `state.js`'s screen transitions are computed by a pure `resolveNextScreen()`
+function of (current screen, answers, email-captured, `CONFIG`) — not by incrementing an
+index through `CONFIG.flow.screens`. The email gate is not in that array at all; its
+position is decided fresh on every transition from `CONFIG.emailGate` and
+`CONFIG.result.revealMode`.
+
+**Considered:** keeping the original index-walk skeleton (`screenIndex + 1` through a
+flat array including `'emailGate'` at a fixed position).
+
+**Why:** the index walk cannot express Test 1 (email gate moved from after Q8 to after
+Q4) — a fixed array position can't make the gate interrupt the quiz mid-way and then
+resume it. It also can't express a variant that skips `partialResult` for a full reveal.
+Building the real screens first surfaced this: `state.shouldShowEmailGate()` existed in
+the skeleton but nothing called it, which was the concrete signal the design was
+incomplete. The resolver makes every variant in this session's scope (and Part 2's
+gate-timing test specifically) a pure `CONFIG` edit, with the state machine unchanged —
+the promise this project's whole architecture exists to keep.
+
+**AI's role:** Claude identified the gap while implementing screens (before writing any
+screen code) and proposed the resolver model with a worked transition table; verified by
+simulating the full answer sequence for baseline and all 3 variant configs headlessly
+before treating it as correct.
+
+---
+
 ## 2026-09-24 — Variant delivery: shared files + config override
 
 **Decision:** Part 2's 3 variants are separate entry HTML files

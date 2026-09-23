@@ -7,10 +7,19 @@
   Why a resolver and not an index walk: CONFIG.flow.screens is only the
   BASE happy path (entry -> quiz -> analyzing -> partialResult ->
   fullResult). The email gate is NOT in that array — its position is
-  decided by CONFIG.emailGate on every transition. That's what lets a
-  Part 2 variant move the gate from after Q8 to after Q4 (interrupting the
-  quiz mid-way, then resuming it) purely by editing CONFIG, with zero
-  changes here.
+  decided fresh, every transition, from CONFIG.emailGate. That's what lets
+  a Part 2 variant move the gate from after Q8 to after Q4 (interrupting
+  the quiz mid-way, then resuming it), or move it to after a full reveal
+  instead of before a partial one, purely by editing CONFIG — zero changes
+  to this file.
+
+  Gate-trigger model: the gate is due exactly once, the first time answers
+  reach `min(afterQuestionIndex, questionCount)`. If that threshold is
+  below questionCount, the trigger point falls mid-quiz and always
+  interrupts it (Test 1's mechanism). If it equals questionCount, the
+  trigger point falls at quiz completion, and CONFIG.emailGate.position
+  then decides whether it gates the result screen before or after it is
+  shown.
 */
 
 var IQLY = window.IQLY || {};
@@ -21,10 +30,6 @@ IQLY.state = (function () {
     answers: [],
     softEntryAnswer: null,
     emailCaptured: false,
-    // Tracks whether the email gate already ran, so a gate placed
-    // "afterResult" (a Test-3-style variant) doesn't re-trigger once
-    // emailCaptured flips true.
-    gateShown: false,
   };
 
   function questionCount() {
@@ -35,23 +40,16 @@ IQLY.state = (function () {
     return current.answers.length < questionCount();
   }
 
-  // The single lever variant 1 (gate after Q4 instead of Q8) rides on.
-  // Baseline (afterQuestionIndex === questionCount) always evaluates
-  // false, so the gate never interrupts the quiz — it falls through to
-  // its normal post-result slot instead.
-  function isGateDueMidQuiz() {
-    var gate = IQLY.CONFIG.emailGate;
-    return !current.emailCaptured
-      && !current.gateShown
-      && current.answers.length === gate.afterQuestionIndex
-      && gate.afterQuestionIndex < questionCount();
+  function gateThreshold() {
+    return Math.min(IQLY.CONFIG.emailGate.afterQuestionIndex, questionCount());
   }
 
-  function isGateDueAfterQuiz() {
-    var gate = IQLY.CONFIG.emailGate;
-    return !current.emailCaptured
-      && !current.gateShown
-      && gate.afterQuestionIndex >= questionCount();
+  function isMidQuizGate() {
+    return gateThreshold() < questionCount();
+  }
+
+  function isGateDueNow() {
+    return !current.emailCaptured && current.answers.length === gateThreshold();
   }
 
   function revealIsFull() {
@@ -69,27 +67,36 @@ IQLY.state = (function () {
         return 'quiz';
 
       case 'quiz':
-        if (isGateDueMidQuiz()) return 'emailGate';
+        // Only a mid-quiz threshold interrupts the quiz itself — a
+        // post-quiz threshold is resolved later, relative to the result
+        // reveal, via CONFIG.emailGate.position (see 'analyzing' below).
+        if (isGateDueNow() && isMidQuizGate()) return 'emailGate';
         if (questionsRemain()) return 'quiz';
-        if (isGateDueAfterQuiz() && gatePosition() === 'beforeResult') return 'emailGate';
         return 'analyzing';
 
       case 'emailGate':
-        // Gate fired mid-quiz (Test 1 style): resume the questions.
+        // Fired mid-quiz: resume the remaining questions. Otherwise the
+        // gate is fully resolved and the user has earned the full result,
+        // regardless of which screen sent them here (analyzing,
+        // partialResult, or fullResult for an afterResult-position gate).
         if (questionsRemain()) return 'quiz';
-        // Gate fired after the quiz but before analyzing (baseline).
-        if (current.screen === 'emailGate' && !current.gateShown) return 'analyzing';
-        return 'analyzing';
+        return 'fullResult';
 
       case 'analyzing':
-        if (current.emailCaptured || revealIsFull()) return 'fullResult';
+        if (current.emailCaptured) return 'fullResult';
+        if (revealIsFull()) {
+          // A full reveal must not show the score ungated — gate first.
+          return gatePosition() === 'beforeResult' ? 'emailGate' : 'fullResult';
+        }
         return 'partialResult';
 
       case 'partialResult':
-        if (current.emailCaptured) return 'fullResult';
-        return 'emailGate';
+        return current.emailCaptured ? 'fullResult' : 'emailGate';
 
       case 'fullResult':
+        // Reached ungated (full reveal + afterResult position): the gate
+        // still needs to be shown once, right after the reveal.
+        if (isGateDueNow() && gatePosition() === 'afterResult') return 'emailGate';
         return 'fullResult'; // terminal
 
       default:
@@ -115,17 +122,9 @@ IQLY.state = (function () {
 
   function recordEmail(email) {
     current.emailCaptured = true;
-    current.gateShown = true;
   }
 
   function advance() {
-    // emailGate is a one-shot: once we leave it, it must not be offered
-    // again even if a later condition would otherwise re-trigger it
-    // (e.g. an "afterResult" position variant that also has answers
-    // landing exactly on afterQuestionIndex).
-    if (current.screen === 'emailGate') {
-      current.gateShown = true;
-    }
     current.screen = resolveNextScreen();
   }
 
@@ -158,7 +157,6 @@ IQLY.state = (function () {
       answers: [],
       softEntryAnswer: null,
       emailCaptured: false,
-      gateShown: false,
     };
   }
 

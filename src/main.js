@@ -6,7 +6,7 @@
 var IQLY = window.IQLY || {};
 
 IQLY.init = function () {
-  IQLY.track('flow_started', {});
+  IQLY.track('page_view', {});
   IQLY.render.mount();
 };
 

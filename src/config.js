@@ -11,9 +11,14 @@ var IQLY = window.IQLY || {};
 
 IQLY.CONFIG = {
   flow: {
-    // Screen sequence is data, not code. A variant can reorder/insert here
-    // without state.js or screens.js changing at all.
-    screens: ['entry', 'quiz', 'analyzing', 'partialResult', 'emailGate', 'fullResult'],
+    // This is the BASE HAPPY PATH ONLY — entry through the result reveal
+    // assuming email is never gated mid-quiz. It intentionally does NOT
+    // include 'emailGate': that screen's position is decided fresh on
+    // every transition by state.js's resolver, driven entirely by
+    // emailGate.afterQuestionIndex/position + result.revealMode below.
+    // That's what lets Test 1 move the gate mid-quiz, or a reveal-mode
+    // variant move it after the result, with zero code changes.
+    screens: ['entry', 'quiz', 'analyzing', 'partialResult', 'fullResult'],
     questionCount: 8,
     // Soft-entry pattern: Q0 sits on the entry screen itself, standing in
     // for a "Start Quiz" button, to remove the landing->start drop-off
@@ -22,10 +27,14 @@ IQLY.CONFIG = {
   },
 
   emailGate: {
-    // Number of questions answered before the gate is shown.
-    // Part 1 baseline: after the full quiz (peak sunk-cost investment).
-    // Test 1 candidate: move to 4 (write-up.md, "Reserved for Part 2").
+    // Number of answered questions at which the gate becomes due. A value
+    // >= questionCount means "after the quiz" (baseline); a lower value
+    // means "mid-quiz", which always interrupts and then resumes the quiz
+    // regardless of `position` below (Test 1: after the full quiz -> 4).
     afterQuestionIndex: 8,
+    // For a post-quiz gate only: show it before the result reveal
+    // (baseline — holds the curiosity gap from a partial reveal) or after
+    // it (only meaningful paired with result.revealMode: 'full').
     position: 'beforeResult', // 'beforeResult' | 'afterResult'
     fields: ['email'],
     requirePassword: false,
@@ -92,12 +101,25 @@ IQLY.CONFIG = {
       subheadline: 'Enter your email to unlock your score, percentile, and full breakdown.',
       emailPlaceholder: 'you@example.com',
       cta: 'Unlock my results',
+      invalidEmail: 'Enter a valid email to continue.',
     },
     fullResult: {
       scoreLabel: 'Your IQ Score',
       percentileLabel: 'You scored higher than {percentile}% of test-takers',
+      archetypeLabel: 'Your Archetype',
       shareCta: 'Share your result',
+      shareCopiedMessage: 'Result copied — paste it anywhere!',
     },
+  },
+
+  // Text + icon only, no illustrated mascots — keeps the test's credibility
+  // intact per write-up.md. Keyed by scoring.js's category names.
+  archetypes: {
+    pattern: { label: 'The Pattern Seeker', icon: '◈' },
+    logic: { label: 'The Logician', icon: '△' },
+    spatial: { label: 'The Spatial Thinker', icon: '▢' },
+    sequence: { label: 'The Sequencer', icon: '⇉' },
+    memory: { label: 'The Retainer', icon: '◉' },
   },
 
   tracking: {

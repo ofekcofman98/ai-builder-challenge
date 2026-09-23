@@ -26,6 +26,22 @@ body {
 
 h1, h2, h3, p {
   margin: 0;
+  line-height: var(--line-height-tight);
+}
+
+h1 {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+}
+
+h2 {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+}
+
+h3 {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
 }
 
 button {

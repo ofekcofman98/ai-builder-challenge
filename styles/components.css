@@ -34,6 +34,44 @@
   background: var(--color-primary-hover);
 }
 
+.btn-secondary {
+  background: var(--color-surface);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+  width: 100%;
+}
+
+.btn-secondary:hover {
+  background: var(--color-border);
+}
+
+/* Answer/option buttons — stacked full-width on mobile so every option is
+   a full-height tap target; text left-aligned since these read like quiz
+   choices, not centered CTAs. */
+.option-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.btn-option {
+  justify-content: flex-start;
+  text-align: left;
+  width: 100%;
+  background: var(--color-surface);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+  padding: var(--space-4);
+}
+
+.btn-option:hover {
+  border-color: var(--color-primary);
+}
+
+.btn-option:active {
+  background: var(--color-border);
+}
+
 .card {
   background: var(--color-surface);
   border: 1px solid var(--color-border);
@@ -93,6 +131,256 @@
   color: var(--color-text);
 }
 
+.field-error {
+  color: #c0392b;
+  font-size: var(--font-size-sm);
+}
+
 .text-muted {
   color: var(--color-text-muted);
+}
+
+.trust-cue {
+  font-size: var(--font-size-sm);
+}
+
+/* Quiz screen */
+.quiz-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.question-prompt {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-tight);
+}
+
+.question-visual {
+  display: flex;
+  justify-content: center;
+}
+
+.streak-chip {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  background: var(--color-surface);
+  border-radius: var(--radius-pill);
+  padding: var(--space-1) var(--space-3);
+}
+
+/* Analyzing / labor-illusion screen */
+.screen-analyzing {
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--color-border);
+  border-top-color: var(--color-primary);
+  border-radius: 50%;
+  animation: iqly-spin 800ms linear infinite;
+}
+
+@keyframes iqly-spin {
+  to { transform: rotate(360deg); }
+}
+
+.analyzing-steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.analyzing-step {
+  color: var(--color-text-muted);
+  transition: color var(--duration-base) ease;
+}
+
+.analyzing-step.is-active {
+  color: var(--color-text);
+  font-weight: var(--font-weight-medium);
+}
+
+/* Partial result — curiosity gap: score obscured, standout strength
+   dominant, trust badge sits directly above the CTA (write-up.md: not at
+   the top, not only at the end). */
+.standout-card {
+  text-align: center;
+}
+
+.standout-card h2 {
+  font-size: var(--font-size-xl);
+  margin-top: var(--space-2);
+  text-transform: capitalize;
+}
+
+.score-locked {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-md);
+  filter: blur(0.2px);
+}
+
+.score-locked-icon {
+  font-size: var(--font-size-lg);
+}
+
+.score-locked-value {
+  font-size: var(--font-size-xxl);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: 0.1em;
+  color: var(--color-text-muted);
+}
+
+.trust-badge {
+  font-size: var(--font-size-sm);
+  text-align: center;
+}
+
+/* Category breakdown — shared by partial and full result screens */
+.category-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.category-row {
+  display: grid;
+  grid-template-columns: 80px 1fr auto;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.category-name {
+  font-size: var(--font-size-sm);
+  text-transform: capitalize;
+}
+
+.category-bar-track {
+  height: var(--space-2);
+  background: var(--color-progress-track);
+  border-radius: var(--radius-pill);
+  overflow: hidden;
+}
+
+.category-bar-fill {
+  height: 100%;
+  background: var(--color-primary);
+  border-radius: var(--radius-pill);
+}
+
+.category-pct {
+  font-size: var(--font-size-sm);
+  min-width: 32px;
+  text-align: right;
+}
+
+/* Full result */
+.score-card {
+  text-align: center;
+}
+
+.score-value {
+  font-size: var(--font-size-xxl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-primary);
+}
+
+.archetype-badge {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-4);
+  background: var(--color-surface);
+  border-radius: var(--radius-md);
+}
+
+.archetype-icon {
+  font-size: var(--font-size-xxl);
+  color: var(--color-primary);
+}
+
+.archetype-badge h3 {
+  font-size: var(--font-size-lg);
+}
+
+/* Debug panel — QA only, active behind ?debug=1 (src/debug.js). Fixed
+   corner overlay, never shown to normal funnel traffic. */
+.debug-panel {
+  position: fixed;
+  bottom: 0;
+  right: 0;
+  width: 280px;
+  max-height: 40vh;
+  overflow-y: auto;
+  background: rgba(18, 19, 26, 0.95);
+  color: #fff;
+  font-size: 11px;
+  font-family: monospace;
+  z-index: 999;
+  border-top-left-radius: var(--radius-sm);
+}
+
+.debug-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-2) var(--space-3);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  position: sticky;
+  top: 0;
+  background: inherit;
+}
+
+.debug-header button {
+  background: none;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  color: #fff;
+  border-radius: var(--radius-sm);
+  padding: 2px 8px;
+  font-size: 10px;
+}
+
+.debug-rows {
+  padding: var(--space-2) var(--space-3);
+}
+
+.debug-row {
+  display: flex;
+  gap: var(--space-2);
+  padding: 2px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.debug-time {
+  opacity: 0.6;
+}
+
+.debug-variant {
+  opacity: 0.8;
+  color: #7fd1ff;
+}
+
+/* Desktop refinements — the shell already centers to a phone-width
+   column (base.css); these are the only widenings past that. */
+@media (min-width: 768px) {
+  .screen {
+    padding: var(--space-7) var(--space-4);
+  }
+
+  .category-row {
+    grid-template-columns: 100px 1fr auto;
+  }
 }
