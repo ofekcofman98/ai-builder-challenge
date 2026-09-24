@@ -17,6 +17,12 @@ var IQLY = window.IQLY || {};
 (function () {
 
   var toastTimer = null;
+  // The mid-quiz percentile toast (see handleAnswer) fires just before
+  // advancing to the NEXT question, so its message is queued here and
+  // shown once that quiz screen actually mounts, in its dedicated
+  // toast-slot rather than as an overlay (see screens.js quiz()).
+  var pendingQuizToast = null;
+  var quizToastTimer = null;
 
   function getToastEl() {
     var el = document.getElementById('iqly-toast');
@@ -97,7 +103,7 @@ var IQLY = window.IQLY || {};
 
     var toastKey = IQLY.CONFIG.feedback.toastsAfterQuestion[answers.length];
     if (toastKey) {
-      showToast(IQLY.CONFIG.copy.feedback[toastKey]);
+      pendingQuizToast = IQLY.CONFIG.copy.feedback[toastKey];
     }
 
     IQLY.state.advance();
@@ -178,6 +184,21 @@ var IQLY = window.IQLY || {};
 
     if (screenName === 'analyzing') {
       runAnalyzingSequence();
+    }
+
+    if (screenName === 'quiz' && pendingQuizToast) {
+      var toastTextEl = document.querySelector('[data-role="toast-slot-text"]');
+      var message = pendingQuizToast;
+      pendingQuizToast = null;
+
+      if (toastTextEl) {
+        toastTextEl.textContent = message;
+        toastTextEl.classList.add('is-visible');
+        clearTimeout(quizToastTimer);
+        quizToastTimer = setTimeout(function () {
+          toastTextEl.classList.remove('is-visible');
+        }, IQLY.CONFIG.feedback.autoDismissMs);
+      }
     }
   }
 

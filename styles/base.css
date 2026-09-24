@@ -64,10 +64,23 @@ input {
 }
 
 /* Desktop: the flow stays a single centered column rather than stretching
-   wide — a quiz reads like a quiz, not a dashboard, on any screen size. */
+   wide — a quiz reads like a quiz, not a dashboard, on any screen size.
+   The surrounding space is deliberately styled (a tinted page background
+   behind a shadowed card), not left as unstyled empty white — otherwise a
+   narrow centered column on a wide viewport just looks like a rendering
+   bug rather than an intentional layout. */
 @media (min-width: 768px) {
+  body {
+    background: var(--color-surface);
+  }
+
   #app {
     max-width: var(--content-max-width);
-    margin: 0 auto;
+    min-height: auto;
+    margin: var(--space-7) auto;
+    background: var(--color-bg);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-card);
+    overflow: hidden;
   }
 }

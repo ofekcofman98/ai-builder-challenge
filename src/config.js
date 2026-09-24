@@ -112,6 +112,13 @@ IQLY.CONFIG = {
       shareCta: 'Share your result',
       shareCopiedMessage: 'Result copied — paste it anywhere!',
     },
+    // Wording for scoring.js's categoryLabel() tiers — replaces a raw
+    // percentage, which is falsely precise given ~1-2 questions/category.
+    categoryLabels: {
+      strong: 'Strong',
+      average: 'Average',
+      needsPractice: 'Needs practice',
+    },
   },
 
   // Text + icon only, no illustrated mascots — keeps the test's credibility

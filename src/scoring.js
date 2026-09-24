@@ -67,6 +67,18 @@ IQLY.scoring = {
     return Math.max(1, Math.min(99, Math.round(p * 100)));
   },
 
+  // With ~1-2 questions per category, a raw percentage only ever lands on
+  // 0/50/100 — displaying that as "0%" or "100%" reads as statistically
+  // precise when it isn't, undermining the "insightful result" framing.
+  // A 3-tier qualitative label is honest about that resolution instead.
+  // Returns a key into CONFIG.copy.categoryLabels — screens.js owns the
+  // actual wording, this only owns the semantic tier.
+  categoryLabel: function (pct) {
+    if (pct >= 67) return 'strong';
+    if (pct >= 34) return 'average';
+    return 'needsPractice';
+  },
+
   /**
    * Picks the category to lead with on the partial-result screen
    * (CONFIG.result.leadWith drives *that* it's shown; this picks *which*).

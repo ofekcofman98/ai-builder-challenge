@@ -55,6 +55,9 @@
   --duration-base: 300ms;
   --duration-toast: 3000ms; /* mirrors CONFIG.feedback.autoDismissMs default */
 
+  /* Elevation */
+  --shadow-card: 0 8px 24px rgba(18, 19, 26, 0.08);
+
   /* Layout */
   --content-max-width: 480px; /* mobile-first: single reading column even on desktop */
   --tap-target-min: 44px;

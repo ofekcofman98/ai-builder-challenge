@@ -123,6 +123,11 @@ IQLY.screens = {
     return (
       '<div class="screen screen-quiz">' +
         progressBar(percent) +
+        // Fixed-height slot, always rendered — render.js fills/clears the
+        // text and toggles visibility, but the reserved space never
+        // changes, so the toast can never overlap the question or options
+        // below it (it used to be a floating overlay; not anymore).
+        '<div class="toast-slot"><span class="toast-slot-text" data-role="toast-slot-text"></span></div>' +
         '<div class="quiz-header">' +
           '<span class="question-label text-muted">' + escapeHtml(label) + '</span>' +
           streakChip +
@@ -224,10 +229,15 @@ IQLY.screens = {
 
     var categoryRows = Object.keys(result.categories).map(function (cat) {
       var pct = result.categories[cat];
+      // Qualitative tier, not a raw percentage — ~1-2 questions/category
+      // makes anything more precise than "Strong/Average/Needs practice"
+      // read as false confidence rather than insight.
+      var tierKey = IQLY.scoring.categoryLabel(pct);
+      var tierLabel = IQLY.CONFIG.copy.categoryLabels[tierKey];
       return '<div class="category-row">' +
         '<span class="category-name">' + escapeHtml(cat) + '</span>' +
         '<div class="category-bar-track"><div class="category-bar-fill" style="width:' + pct + '%"></div></div>' +
-        '<span class="category-pct text-muted">' + pct + '%</span>' +
+        '<span class="category-tier text-muted">' + escapeHtml(tierLabel) + '</span>' +
       '</div>';
     }).join('');
 

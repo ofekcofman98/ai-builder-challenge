@@ -175,6 +175,34 @@
 }
 
 /* Quiz screen */
+
+/* Mid-quiz percentile feedback — a dedicated, always-present slot rather
+   than a floating overlay, so it can never cover the question or answer
+   options below it. Height is reserved constantly; only the pill inside
+   fades/slides in and out, so nothing else in the layout ever shifts. */
+.toast-slot {
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.toast-slot-text {
+  opacity: 0;
+  transform: translateY(-6px);
+  transition: opacity var(--duration-base) ease, transform var(--duration-base) ease;
+  background: var(--color-toast-bg);
+  color: var(--color-toast-text);
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-pill);
+  font-size: var(--font-size-sm);
+}
+
+.toast-slot-text.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
 .quiz-header {
   display: flex;
   align-items: center;
@@ -333,10 +361,11 @@
   border-radius: var(--radius-pill);
 }
 
-.category-pct {
+.category-tier {
   font-size: var(--font-size-sm);
-  min-width: 32px;
+  min-width: 96px;
   text-align: right;
+  white-space: nowrap;
 }
 
 /* Full result */
