@@ -40,7 +40,7 @@ result (myiqtested.com) by completing each flow end-to-end as a user.
    ask, but removes the highest drop-off point observed across all
    3 competitors while still giving the user a half-second of
    framing before acting.
-   
+
 2. **Zero monetary cues before account creation** — Explicit design
    rule, directly informed by my own negative reaction as a test
    user to seeing a price indicator early. Trade-off: no upsell
@@ -175,3 +175,46 @@ presentation one.
   investment + partial-value FOMO increases signup rate vs. the
   full-quiz-then-gate baseline. Directly informed by the task's own
   example filename convention (`variant-1-signup-after-q3.html`).
+
+
+  ## Deferred Scope — Noted, Not Implemented
+
+Several ideas were considered and deliberately excluded from this
+flow because they don't move the measured KPI (account creation
+from ad click), but are worth noting as they inform the product
+thinking behind the design:
+
+- **Quiz navigation**: Users cannot skip questions or go back to
+  change previous answers. This is intentional — each answer is a
+  micro-commitment that increases completion likelihood, and
+  allowing edits would undercut both that psychology and the
+  perceived rigor of the test.
+
+- **Historical comparison / retake tracking**: Storing a user's past
+  results and showing improvement over time (e.g. "your IQ score
+  this month vs. last") was considered as a reason account creation
+  — not just email capture — has standing value beyond the initial
+  session. Not built here, since it doesn't affect the funnel being
+  measured, but it strengthens the case for why "create an account"
+  is the right ask rather than a lighter-weight action.
+
+- **Future monetization paths**: Two directions were considered,
+  both deliberately out of scope for this CVR-focused flow: (1) a
+  one-time paid "official certificate" (the pattern observed in
+  organic competitor research), and (2) a subscription "IQ Coach"
+  agent offering ongoing, personalized cognitive training —
+  consistent with the broader shift toward AI-native, agentic
+  product experiences. Neither was implemented, since introducing
+  any monetary element before account creation would work against
+  the flow's actual goal, but the agent-based direction in
+  particular reflects where this kind of product likely evolves
+  next.
+
+  A lightweight post-signup upsell screen was added (not part of the
+  measured funnel, since it appears only after account creation) to
+  demonstrate the two monetization directions considered: historical
+  progress tracking and an AI-powered "IQ Coach." Both are shown as
+  teaser UI only — no payment processing was built, as this is
+  explicitly out of the CVR scope for this challenge. Click-through on
+  each option is tracked, since which direction users gravitate toward
+  is itself a useful signal for a future iteration.
