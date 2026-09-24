@@ -18,7 +18,10 @@ IQLY.CONFIG = {
     // emailGate.afterQuestionIndex/position + result.revealMode below.
     // That's what lets Test 1 move the gate mid-quiz, or a reveal-mode
     // variant move it after the result, with zero code changes.
-    screens: ['entry', 'quiz', 'analyzing', 'partialResult', 'fullResult'],
+    // 'upsell' is listed for reference only — it's reached via an
+    // explicit user click (fullResult's "Unlock more"), not the resolver,
+    // since it's an optional post-signup detour, not a funnel step.
+    screens: ['entry', 'quiz', 'analyzing', 'partialResult', 'fullResult', 'upsell'],
     questionCount: 8,
     // Soft-entry pattern: Q0 sits on the entry screen itself, standing in
     // for a "Start Quiz" button, to remove the landing->start drop-off
@@ -115,6 +118,10 @@ IQLY.CONFIG = {
       archetypeLabel: 'Your Archetype',
       shareCta: 'Share your result',
       shareCopiedMessage: 'Result copied — paste it anywhere!',
+      // Low-key, text-style entry point into the upsell screen — this is
+      // the account's already been created, so nothing here is measured
+      // as part of the funnel; it doesn't need CTA-level visual weight.
+      unlockMoreCta: 'Unlock more with IQly',
     },
     // Wording for scoring.js's categoryLabel() tiers — replaces a raw
     // percentage, which is falsely precise given ~1-2 questions/category.
@@ -122,6 +129,35 @@ IQLY.CONFIG = {
       strong: 'Strong',
       average: 'Average',
       needsPractice: 'Needs practice',
+    },
+    // Post-signup upsell teaser (not a real payment flow — see
+    // render.js's handleSelectPlan). No urgency/countdown copy anywhere
+    // here by design: it would clash with the credibility the flow spends
+    // the whole quiz building.
+    upsell: {
+      headline: 'Unlock more with IQly',
+      subheadline: 'Optional add-ons — no pressure.',
+      maybeLater: 'Maybe later',
+      comingSoon: 'Coming soon',
+      // Object key order is display order (progress first, then the more
+      // aspirational coaching tier) — iterated via Object.keys in
+      // screens.js, same pattern scoring.js already relies on for
+      // categories.
+      plans: {
+        progress: {
+          title: 'Track Your Progress',
+          description: 'Retake the test over time and see your IQ trend.',
+          price: '$9/mo',
+          cta: 'Get started',
+        },
+        coach: {
+          title: 'IQ Coach',
+          badge: 'Premium',
+          description: 'AI-powered, personalized cognitive training.',
+          price: '$19/mo',
+          cta: 'Get started',
+        },
+      },
     },
   },
 

@@ -77,6 +77,12 @@ var IQLY = window.IQLY || {};
     if (screenName === 'partialResult' || screenName === 'fullResult') {
       IQLY.track('result_viewed', { screen: screenName });
     }
+    // Post-signup only — a signal for product interest, not a funnel step
+    // (it can't affect account creations / page visits, since the account
+    // already exists by the time this screen is reachable).
+    if (screenName === 'upsell') {
+      IQLY.track('upsell_viewed', {});
+    }
   }
 
   function isValidEmail(value) {
@@ -147,6 +153,30 @@ var IQLY = window.IQLY || {};
     }
   }
 
+  function handleViewUpsell() {
+    IQLY.state.viewUpsell();
+    mount();
+  }
+
+  function handleSelectPlan(planId) {
+    // Genuinely useful signal even as a teaser — which tier users show
+    // interest in, without building any real payment flow behind it.
+    IQLY.track('upsell_plan_selected', { plan: planId });
+
+    var btn = document.querySelector('[data-action="select-plan"][data-value="' + planId + '"]');
+    if (btn) {
+      btn.textContent = IQLY.CONFIG.copy.upsell.comingSoon;
+      btn.disabled = true;
+      btn.classList.add('is-disabled');
+    }
+  }
+
+  function handleDismissUpsell() {
+    IQLY.track('upsell_dismissed', {});
+    IQLY.state.dismissUpsell();
+    mount();
+  }
+
   function onAppClick(event) {
     var target = event.target.closest('[data-action]');
     if (!target) return;
@@ -158,6 +188,9 @@ var IQLY = window.IQLY || {};
     else if (action === 'answer') handleAnswer(value);
     else if (action === 'submit-email') handleEmailSubmit();
     else if (action === 'share') handleShare();
+    else if (action === 'view-upsell') handleViewUpsell();
+    else if (action === 'select-plan') handleSelectPlan(value);
+    else if (action === 'dismiss-upsell') handleDismissUpsell();
   }
 
   function onAppSubmit(event) {

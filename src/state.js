@@ -101,6 +101,9 @@ IQLY.state = (function () {
         if (isGateDueNow() && gatePosition() === 'afterResult') return 'emailGate';
         return 'fullResult'; // terminal
 
+      case 'upsell':
+        return 'upsell'; // only left via dismissUpsell(), below
+
       default:
         return 'entry';
     }
@@ -128,6 +131,18 @@ IQLY.state = (function () {
 
   function advance() {
     current.screen = resolveNextScreen();
+  }
+
+  // upsell is a user-chosen detour off the resolver's forward-only path,
+  // not a CONFIG-driven branch — it's reached from fullResult by explicit
+  // click and left the same way, so it's a direct jump rather than
+  // something resolveNextScreen() needs to decide.
+  function viewUpsell() {
+    current.screen = 'upsell';
+  }
+
+  function dismissUpsell() {
+    current.screen = 'fullResult';
   }
 
   function getProgressPercent() {
@@ -177,6 +192,8 @@ IQLY.state = (function () {
     recordAnswer: recordAnswer,
     recordEmail: recordEmail,
     advance: advance,
+    viewUpsell: viewUpsell,
+    dismissUpsell: dismissUpsell,
     getProgressPercent: getProgressPercent,
     getStreak: getStreak,
     getResult: getResult,

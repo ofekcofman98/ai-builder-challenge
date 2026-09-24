@@ -307,6 +307,52 @@ IQLY.screens = {
         '<button class="btn btn-secondary" type="button" data-action="share">' +
           escapeHtml(copy.shareCta) +
         '</button>' +
+        // Post-signup only — the account already exists, so this can't
+        // dilute the measured funnel (account creations / page visits).
+        // Deliberately low visual weight next to Share: this is a detour,
+        // not the point of the screen.
+        '<button class="btn btn-link" type="button" data-action="view-upsell">' +
+          escapeHtml(copy.unlockMoreCta) +
+        '</button>' +
+      '</div>'
+    );
+  },
+
+  // Post-signup upsell teaser — not a real payment flow (render.js's
+  // handleSelectPlan just tracks interest and shows a static "coming
+  // soon" state). "Maybe later" is styled identically to the two paid
+  // CTAs — this whole screen is optional, and declining it should feel
+  // exactly as easy as accepting one of the offers.
+  upsell: function () {
+    var copy = IQLY.CONFIG.copy.upsell;
+    var planKeys = Object.keys(copy.plans);
+
+    var cards = planKeys.map(function (key) {
+      var plan = copy.plans[key];
+      var isPremium = key === 'coach'; // the more aspirational tier
+      return (
+        '<div class="card upsell-card' + (isPremium ? ' upsell-card-premium' : '') + '">' +
+          (plan.badge ? '<span class="upsell-badge">' + escapeHtml(plan.badge) + '</span>' : '') +
+          '<h3>' + escapeHtml(plan.title) + '</h3>' +
+          '<p class="text-muted">' + escapeHtml(plan.description) + '</p>' +
+          '<div class="upsell-price">' + escapeHtml(plan.price) + '</div>' +
+          '<button class="btn btn-primary" type="button" data-action="select-plan" data-value="' + key + '">' +
+            escapeHtml(plan.cta) +
+          '</button>' +
+        '</div>'
+      );
+    }).join('');
+
+    return (
+      '<div class="screen screen-upsell">' +
+        '<div>' +
+          '<h1>' + escapeHtml(copy.headline) + '</h1>' +
+          '<p class="text-muted">' + escapeHtml(copy.subheadline) + '</p>' +
+        '</div>' +
+        '<div class="upsell-grid">' + cards + '</div>' +
+        '<button class="btn btn-secondary" type="button" data-action="dismiss-upsell">' +
+          escapeHtml(copy.maybeLater) +
+        '</button>' +
       '</div>'
     );
   },

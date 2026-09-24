@@ -45,6 +45,26 @@
   background: var(--color-border);
 }
 
+/* Text-only, low-emphasis button — the fullResult -> upsell entry point.
+   Keeps the same tap-target height as every other button (accessibility),
+   just without the visual weight of a real CTA. */
+.btn-link {
+  background: none;
+  border: none;
+  color: var(--color-primary);
+  width: 100%;
+}
+
+.btn-link:hover {
+  text-decoration: underline;
+}
+
+.btn.is-disabled,
+.btn:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
 /* Answer/option buttons — stacked full-width on mobile so every option is
    a full-height tap target; text left-aligned since these read like quiz
    choices, not centered CTAs. */
@@ -394,6 +414,48 @@
   font-size: var(--font-size-lg);
 }
 
+/* Post-signup upsell teaser. Stacks on mobile, side-by-side on desktop
+   (see the grid-template-columns override in the desktop block below).
+   The premium card gets a distinct border + a plain text badge — no
+   countdown/urgency treatment, that would clash with the credibility the
+   whole flow is built on. */
+.upsell-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-4);
+}
+
+.upsell-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-2);
+}
+
+.upsell-card-premium {
+  border: 2px solid var(--color-primary);
+}
+
+.upsell-badge {
+  background: var(--color-primary);
+  color: var(--color-primary-contrast);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  padding: 2px var(--space-3);
+  border-radius: var(--radius-pill);
+}
+
+.upsell-price {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-primary);
+  margin-top: var(--space-2);
+}
+
+.upsell-card .btn {
+  margin-top: auto;
+}
+
 /* Debug panel — QA only, active behind ?debug=1 (src/debug.js). Fixed
    corner overlay, never shown to normal funnel traffic. */
 .debug-panel {
@@ -460,5 +522,9 @@
 
   .category-row {
     grid-template-columns: 100px 1fr auto;
+  }
+
+  .upsell-grid {
+    grid-template-columns: 1fr 1fr;
   }
 }
