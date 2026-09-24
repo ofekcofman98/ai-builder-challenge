@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>IQly — Full-Screen 1080x1920 (Build B, bonus — not the PNG deliverable)</title>
+<link rel="stylesheet" href="../styles/tokens.css">
+<style>
+  /* Bonus HTML-only demo — never exported to PNG, never a substitute for
+     creative-1080x1920.html's Build A (the actual PNG deliverable). See
+     part3-spec.md's ad-serving-constraint note: a *served* image creative
+     has exactly one click-through URL for the whole image, so per-answer
+     deep-linking can only exist here, outside that constraint. Layout
+     mirrors Build A; see that file for the shared rationale on tokens.css
+     colors and table/table-cell over flexbox. */
+  html, body {
+    margin: 0;
+    padding: 0;
+    width: 1080px;
+    height: 1920px;
+    overflow: hidden;
+    font-family: var(--font-family);
+    background: var(--color-bg);
+  }
+
+  .wrap {
+    display: table;
+    box-sizing: border-box;
+    width: 1080px;
+    height: 1920px;
+  }
+  .content {
+    display: table-cell;
+    vertical-align: middle;
+    box-sizing: border-box;
+    width: 1080px;
+    padding: 0 64px;
+  }
+
+  .header {
+    display: table;
+    width: 100%;
+  }
+  .header .mark {
+    display: table-cell;
+    width: 68px;
+    vertical-align: middle;
+  }
+  .header .mark svg { width: 60px; height: 60px; display: block; }
+  .header .wordmark {
+    display: table-cell;
+    vertical-align: middle;
+    padding-left: 16px;
+    font-size: 40px;
+    font-weight: var(--font-weight-bold);
+    color: var(--color-text);
+  }
+
+  .headline {
+    margin: 64px 0 8px;
+    font-size: 64px;
+    font-weight: var(--font-weight-bold);
+    line-height: 1.15;
+    color: var(--color-text);
+  }
+  .subheadline {
+    margin: 0 0 56px;
+    font-size: 32px;
+    color: var(--color-text-muted);
+  }
+
+  .question-card {
+    box-sizing: border-box;
+    width: 100%;
+    padding: 48px 44px;
+    background: var(--color-surface);
+    border-radius: var(--radius-md);
+  }
+  .question-prompt {
+    margin: 0 0 36px;
+    font-size: 44px;
+    font-weight: var(--font-weight-medium);
+    line-height: 1.3;
+    color: var(--color-text);
+  }
+
+  /* Unlike Build A, each option is a real click zone: index.html?q1=<i>
+     pre-fills that answer and advances state past Q1 on landing, so the
+     user is never re-asked the question they just answered here — see
+     src/main.js's readAnswerParam(). */
+  a.option {
+    display: block;
+    box-sizing: border-box;
+    width: 100%;
+    margin-bottom: 20px;
+    padding: 30px 32px;
+    background: var(--color-bg);
+    border: 2px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    font-size: 36px;
+    color: var(--color-text);
+    text-decoration: none;
+  }
+  a.option:last-child { margin-bottom: 0; }
+
+  a.cta-banner {
+    display: block;
+    box-sizing: border-box;
+    width: 100%;
+    margin-top: 72px;
+    padding: 0 32px;
+    height: 128px;
+    line-height: 128px;
+    text-align: center;
+    background: var(--color-primary);
+    color: var(--color-primary-contrast);
+    font-size: 44px;
+    font-weight: var(--font-weight-bold);
+    border-radius: var(--radius-md);
+    text-decoration: none;
+  }
+
+  .microcopy {
+    margin: 32px 0 0;
+    font-size: 28px;
+    color: var(--color-text-muted);
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="content">
+      <div class="header">
+        <span class="mark">
+          <svg viewBox="0 0 64 64" aria-hidden="true">
+            <circle cx="24" cy="24" r="14" fill="var(--color-primary)" opacity="0.85"/>
+            <rect x="30" y="30" width="24" height="24" rx="4" fill="var(--color-primary)" opacity="0.55"/>
+            <polygon points="16,52 28,52 22,40" fill="var(--color-primary)" opacity="0.7"/>
+          </svg>
+        </span>
+        <span class="wordmark">IQly</span>
+      </div>
+
+      <p class="headline">What's your IQ?</p>
+      <p class="subheadline">Free · about 3 minutes · no signup to start</p>
+
+      <div class="question-card">
+        <p class="question-prompt" id="question-prompt"></p>
+        <div id="option-list"></div>
+      </div>
+
+      <!-- Fallback for a viewer who taps outside an answer: still lands
+           on Q1 directly (Build A's mechanism), just without a pre-filled
+           answer. -->
+      <a class="cta-banner" href="../index.html?skip=entry" target="_top">Or jump to the quiz &rarr;</a>
+      <p class="microcopy">Tap an answer to submit it and continue instantly</p>
+    </div>
+  </div>
+
+  <!-- Real question content, not invented: pulls q1 straight from the
+       quiz source. Deliberately stays on q1 even though Build A (the PNG
+       deliverable) moved to q6's icon-rendered pattern options — this
+       creative's whole mechanism (?qN=<index> pre-fills that answer and
+       advances state past it) only ever works for the FIRST unanswered
+       question: src/main.js's readAnswerParam() guards on
+       `questionIndex === state.getAnswers().length`, which is 0 on a
+       fresh page load. A ?q6=<index> link would always be rejected — the
+       app has no way to validly skip straight to question 6 without the
+       5 preceding answers recorded. q1 also has no optionShapes (it's a
+       sequence question, plain numeric options), so there's no icon
+       version of it to show even visually. -->
+  <script src="../src/questions.js"></script>
+  <script>
+    (function () {
+      var q = IQLY.QUESTIONS.filter(function (item) { return item.id === 'q1'; })[0];
+      document.getElementById('question-prompt').textContent = q.prompt;
+
+      var listEl = document.getElementById('option-list');
+      var html = '';
+      q.options.forEach(function (option, i) {
+        html += '<a class="option" href="../index.html?q1=' + i + '" target="_top">' + option + '</a>';
+      });
+      listEl.innerHTML = html;
+    })();
+  </script>
+</body>
+</html>

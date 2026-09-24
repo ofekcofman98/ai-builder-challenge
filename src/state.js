@@ -145,6 +145,15 @@ IQLY.state = (function () {
     current.screen = resolveNextScreen();
   }
 
+  // Deep-link entry point for ad creatives that promise "start on Q1"
+  // (see creatives/creative-1080x1920.html + part3-spec.md Build A) —
+  // sets the screen directly rather than through resolveNextScreen(),
+  // since 'entry' -> 'quiz' is the one resolver edge that assumes the
+  // soft-entry Q0 was actually shown. Only valid before the first mount.
+  function skipToQuiz() {
+    current.screen = 'quiz';
+  }
+
   // upsell is a user-chosen detour off the resolver's forward-only path,
   // not a CONFIG-driven branch — it's reached from fullResult by explicit
   // click and left the same way, so it's a direct jump rather than
@@ -205,6 +214,7 @@ IQLY.state = (function () {
     recordAnswer: recordAnswer,
     recordEmail: recordEmail,
     advance: advance,
+    skipToQuiz: skipToQuiz,
     viewUpsell: viewUpsell,
     dismissUpsell: dismissUpsell,
     getProgressPercent: getProgressPercent,

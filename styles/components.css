@@ -94,6 +94,94 @@
   background: var(--color-border);
 }
 
+.option-label {
+  flex: 1 1 auto;
+}
+
+/* Pattern/spatial options with an optionShapes entry (questions.js) — a
+   2x2 icon grid instead of the text options' single column. One rule set,
+   one proportion (icon = 44% of its cell, always — see .option-icon-wrap
+   below) — the icon/button sizing here used to be two independent pixel
+   numbers hand-tuned against each other; this is the rewrite that removes
+   that class of bug instead of re-tuning it again. */
+.option-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  /* A definite height (not max-height) split across 2 fr rows, not
+     aspect-ratio, is what actually caps total footprint. max-height
+     alone doesn't shrink aspect-ratio:1/1 cells — their height is driven
+     by column width regardless of a max-height on the parent, so at
+     narrow widths a wide-enough column still produces cells taller than
+     the cap, overflowing past it (confirmed at all 3 verification widths:
+     360/390/480 all overflowed the viewport, not just clipped vertically).
+     grid-template-rows: 1fr 1fr against a real height guarantees both
+     rows fit, full stop — cells come out rectangular rather than
+     perfectly square, a deliberate trade for "never scrolls, ever". */
+  grid-template-rows: 1fr 1fr;
+  /* 42vh (the initially-tried value) left the quiz screen 18px taller
+     than the viewport at 360x640 specifically — verified with Puppeteer
+     (document.documentElement.scrollHeight vs clientHeight), not just
+     eyeballed. 36vh closes that with margin at all 3 verification
+     widths, confirmed the same way. */
+  height: clamp(160px, 36vh, 300px);
+  gap: var(--space-3);
+}
+
+.btn-option-grid {
+  /* Grid items default to min-width: auto, which lets a cell's own
+     content (the option label's text) force its track wider than its
+     1fr share — confirmed as a real horizontal-overflow bug at all 3
+     verification widths (360/390/480), not just a theoretical one. This
+     overrides that default so the fixed 2-column split actually holds. */
+  min-width: 0;
+  /* The icon-wrap's 55% width was resolving correctly against this card's
+     own content-box (confirmed via getBoundingClientRect — not a sizing
+     bug), but the card itself was stretching to its full 1fr grid-track
+     width regardless, so "55% of a big card" still read as a small icon
+     lost in a big mostly-empty card. Capping the card's own width is what
+     actually makes the icon the dominant visual element — justify-self
+     centers the now-narrower card within its still-full-width track. */
+  max-width: 180px;
+  justify-self: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  min-height: var(--tap-target-min);
+  border-radius: var(--radius-md);
+}
+
+/* The single proportion rule: the icon is always 55% of its own cell's
+   (now width-capped) content box, both scaling together. Never set an
+   icon pixel size and a cell pixel size as two separate decisions. */
+.btn-option-grid .option-icon-wrap {
+  width: 55%;
+  aspect-ratio: 1 / 1;
+}
+
+.option-icon {
+  width: 100%;
+  height: 100%;
+  display: block;
+  /* Without explicit width/height attributes on the <svg> (deliberate —
+     see questions.js's optionIcon()), a browser can't resolve width:100%
+     for min-content purposes and falls back to the default replaced-
+     element intrinsic size (300x150) when computing how wide this forces
+     its ancestors to be — confirmed as the actual root cause of the grid
+     overflow at all 3 verification widths, not the grid-track math itself.
+     optionIcon()'s viewBox is always square (canvasSize x canvasSize), so
+     this ratio is always correct and lets 100%/100% resolve properly
+     instead of contributing a phantom 300px-wide min-content. */
+  aspect-ratio: 1 / 1;
+}
+
+.btn-option-grid .option-label {
+  font-size: var(--font-size-sm);
+  text-align: center;
+}
+
 .card {
   background: var(--color-surface);
   border: 1px solid var(--color-border);
@@ -207,6 +295,15 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  /* .screen's gap (--space-5, 24px) applies above AND below this slot,
+     stacking with its own 40px height into 88px of dead air between the
+     progress bar and the quiz-header (measured via Puppeteer, not
+     eyeballed: 24+40+24 exactly). The 40px slot itself is load-bearing
+     (mid-quiz toast feature) and stays; these negative margins claw back
+     16px of the surrounding gap on each side, shrinking it to 8px without
+     touching .screen's shared gap value (which every other screen also
+     uses and shouldn't change). */
+  margin: -16px 0;
 }
 
 .toast-slot-text {
@@ -246,6 +343,29 @@
   font-size: var(--font-size-lg);
   font-weight: var(--font-weight-medium);
   line-height: var(--line-height-tight);
+}
+
+/* Sequence prompts ("2, 4, 6, 8, __"): keep the number list + blank on one
+   line regardless of prompt length or viewport width (docs/fixes.md Tier
+   1 — this used to wrap mid-sequence), and give the blank a visibly
+   distinct chip instead of plain "__" text. */
+.sequence-line {
+  display: inline-block;
+  white-space: nowrap;
+}
+
+.sequence-blank {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.6em;
+  height: 1.6em;
+  padding: 0 var(--space-1);
+  background: var(--color-primary);
+  color: var(--color-primary-contrast);
+  border-radius: var(--radius-sm);
+  font-weight: var(--font-weight-bold);
+  vertical-align: middle;
 }
 
 .question-visual {

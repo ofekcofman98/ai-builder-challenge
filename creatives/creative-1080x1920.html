@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>IQly — Full-Screen 1080x1920 (Build A)</title>
+<link rel="stylesheet" href="../styles/tokens.css">
+<style>
+  /* Creative-only layout. Colors/type/radius come from tokens.css; the
+     question + options below are pulled from src/questions.js at runtime
+     (not retyped here), same pattern as creative-250x250.html, so what's
+     teased matches what's actually asked. Plain block flow + table-cell
+     for the one row that needs horizontal alignment — no flexbox, see
+     creatives/export.js for why. */
+  html, body {
+    margin: 0;
+    padding: 0;
+    width: 1080px;
+    height: 1920px;
+    overflow: hidden;
+    font-family: var(--font-family);
+    background: var(--color-bg);
+  }
+
+  .wrap {
+    display: table;
+    box-sizing: border-box;
+    width: 1080px;
+    height: 1920px;
+  }
+  .content {
+    display: table-cell;
+    vertical-align: middle;
+    box-sizing: border-box;
+    width: 1080px;
+    padding: 0 64px;
+  }
+
+  .header {
+    display: table;
+    width: 100%;
+  }
+  .header .mark {
+    display: table-cell;
+    width: 68px;
+    vertical-align: middle;
+  }
+  .header .mark svg { width: 60px; height: 60px; display: block; }
+  .header .wordmark {
+    display: table-cell;
+    vertical-align: middle;
+    padding-left: 16px;
+    font-size: 40px;
+    font-weight: var(--font-weight-bold);
+    color: var(--color-text);
+  }
+
+  .headline {
+    margin: 64px 0 8px;
+    font-size: 64px;
+    font-weight: var(--font-weight-bold);
+    line-height: 1.15;
+    color: var(--color-text);
+  }
+  .subheadline {
+    margin: 0 0 56px;
+    font-size: 32px;
+    color: var(--color-text-muted);
+  }
+
+  .question-card {
+    box-sizing: border-box;
+    width: 100%;
+    padding: 48px 44px;
+    background: var(--color-surface);
+    border-radius: var(--radius-md);
+  }
+  .question-prompt {
+    margin: 0 0 36px;
+    font-size: 44px;
+    font-weight: var(--font-weight-medium);
+    line-height: 1.3;
+    color: var(--color-text);
+  }
+
+  .question-visual {
+    text-align: center;
+    margin: 0 0 36px;
+  }
+
+  /* Options render as static visual content, not live click targets —
+     Build A's whole creative is one clickthrough link (part3-spec.md's
+     ad-serving-constraint note: a served image has exactly one URL for
+     the entire creative). See creative-1080x1920-interactive.html for the
+     per-answer-deep-link bonus build.
+
+     Table layout, not the live app's CSS Grid (.option-grid in
+     components.css) — same reason as table/table-cell over flexbox
+     elsewhere in creatives/: wkhtmltoimage's export renderer predates
+     CSS Grid support entirely (see creatives/export.js).
+
+     Deliberately NOT styled like the live quiz's real answer buttons
+     (bordered box, surface background, full-contrast text) — that
+     similarity was confirmed as a defect in the first build, inviting a
+     tap on one specific option expecting it to register an answer, when
+     every tap goes to the same ?skip=entry destination. Muted, unbordered
+     tiles read as a preview, not a control. */
+  .option-grid-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 20px;
+    margin: -20px;
+  }
+  .option-cell {
+    box-sizing: border-box;
+    width: 50%;
+    padding: 32px;
+    text-align: center;
+    vertical-align: middle;
+  }
+  .option-cell .option-icon {
+    width: 96px;
+    height: 96px;
+    display: block;
+    margin: 0 auto 16px;
+  }
+  .option-cell .option-label {
+    display: block;
+    font-size: 32px;
+    color: var(--color-text-muted);
+  }
+
+  .cta-banner {
+    box-sizing: border-box;
+    width: 100%;
+    margin-top: 72px;
+    padding: 0 32px;
+    height: 128px;
+    line-height: 128px;
+    text-align: center;
+    background: var(--color-primary);
+    color: var(--color-primary-contrast);
+    font-size: 44px;
+    font-weight: var(--font-weight-bold);
+    border-radius: var(--radius-md);
+  }
+
+  .microcopy {
+    margin: 32px 0 0;
+    font-size: 28px;
+    color: var(--color-text-muted);
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+  <!-- Single click-through target for the whole creative: Build A's
+       deep link (see part3-spec.md, src/main.js's readSkipParam) lands
+       the user directly on the quiz's actual Q1, skipping the entry/
+       soft-entry screen. Q6 is shown above as the hook (a pattern
+       question demonstrates the icon-rendered-options mechanic better
+       than q1's plain sequence numbers) — landing still opens on the
+       quiz's real first question, not q6 specifically; the microcopy
+       below ("jump straight into the quiz") is deliberately generic
+       about which question comes next rather than promising this one. -->
+  <a class="wrap" href="../index.html?skip=entry" target="_top" style="text-decoration:none;color:inherit;">
+    <div class="content">
+      <div class="header">
+        <span class="mark">
+          <svg viewBox="0 0 64 64" aria-hidden="true">
+            <circle cx="24" cy="24" r="14" fill="var(--color-primary)" opacity="0.85"/>
+            <rect x="30" y="30" width="24" height="24" rx="4" fill="var(--color-primary)" opacity="0.55"/>
+            <polygon points="16,52 28,52 22,40" fill="var(--color-primary)" opacity="0.7"/>
+          </svg>
+        </span>
+        <span class="wordmark">IQly</span>
+      </div>
+
+      <p class="headline">What's your IQ?</p>
+      <p class="subheadline">Free · about 3 minutes · no signup to start</p>
+
+      <div class="question-card">
+        <p class="question-prompt" id="question-prompt"></p>
+        <div class="question-visual" id="question-visual"></div>
+        <table class="option-grid-table" role="presentation" id="option-grid"></table>
+      </div>
+
+      <div class="cta-banner">Answer this question &rarr;</div>
+      <p class="microcopy">Tap anywhere to jump straight into the quiz</p>
+    </div>
+  </a>
+
+  <!-- Real question content, not invented: pulls q6 straight from the
+       quiz source — the icon-rendered options match what the live quiz
+       now actually shows for pattern questions (questions.js's
+       optionShapes / screens.js's quiz(), added after this ad was first
+       built with plain-text options) so the ad's visual promise stays
+       honest. -->
+  <script src="../src/questions.js"></script>
+  <script>
+    (function () {
+      var q = IQLY.QUESTIONS.filter(function (item) { return item.id === 'q6'; })[0];
+
+      // window.__IQLY_TOKENS__ is set only by creatives/export.js's export
+      // pass, for a renderer without CSS custom-property support —
+      // resolves var(--color-primary) etc. in this runtime-generated SVG
+      // markup. Unused (and harmless) in a real browser.
+      function resolveTokens(svgMarkup) {
+        if (!window.__IQLY_TOKENS__) return svgMarkup;
+        return svgMarkup.replace(/var\((--[a-z0-9-]+)\)/gi, function (full, name) {
+          return window.__IQLY_TOKENS__[name] || full;
+        });
+      }
+
+      document.getElementById('question-prompt').textContent = q.prompt;
+
+      var visualEl = document.getElementById('question-visual');
+      visualEl.innerHTML = resolveTokens(q.render());
+
+      // svgGrid() ships width="100%" height="auto" for the live app, where
+      // modern browsers size from the viewBox aspect ratio. The export
+      // renderer (see creatives/export.js) doesn't, and renders at 0
+      // height — pin explicit pixel dimensions from the viewBox instead
+      // (same fix as creative-250x250.html's question visual).
+      // svgGridMatrix() (q6's renderer) now ships explicit width/height
+      // pixel attributes of its own (no width:100%/max-width scaling
+      // trick — see questions.js's comment on why that was fragile: an
+      // inline style always wins over an HTML attribute, which is exactly
+      // what silently capped this creative's canvas at 96px before this
+      // was fixed at the source). The overwrite below still applies
+      // uniformly to whichever renderer q.render() used.
+      var visualSvg = visualEl.getElementsByTagName('svg')[0];
+      var vb = visualSvg.getAttribute('viewBox').split(' ');
+      var vbWidth = parseFloat(vb[2]);
+      var vbHeight = parseFloat(vb[3]);
+      var targetWidth = 600;
+      visualSvg.setAttribute('width', targetWidth);
+      visualSvg.setAttribute('height', Math.round((vbHeight / vbWidth) * targetWidth));
+
+      // Shared canvas size across all 4 options — see src/questions.js's
+      // optionIcon() comment: without this, a 1-shape option's icon
+      // stretches to fill the same cell as a 3-shape option's, rendering
+      // its shape visibly larger despite an identical absolute radius.
+      var maxCount = Math.max.apply(null, q.optionShapes.map(function (s) { return s.count; }));
+      var iconCanvasSize = IQLY.iconCanvasSize(maxCount);
+
+      var gridEl = document.getElementById('option-grid');
+      var html = '';
+      q.options.forEach(function (option, i) {
+        var shapeSpec = q.optionShapes[i];
+        var icon = resolveTokens(IQLY.optionIcon(shapeSpec.shape, shapeSpec.count, iconCanvasSize));
+        if (i % 2 === 0) html += '<tr>';
+        html += '<td class="option-cell">' + icon +
+          '<span class="option-label">' + option + '</span></td>';
+        if (i % 2 === 1) html += '</tr>';
+      });
+      gridEl.innerHTML = html;
+    })();
+  </script>
+</body>
+</html>

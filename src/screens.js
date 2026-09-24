@@ -25,6 +25,29 @@ function formatCopy(template, values) {
   });
 }
 
+// Sequence-type prompts ("What comes next in the sequence? 2, 4, 6, 8, __")
+// were wrapping mid-number-list on narrow/wide layouts alike, and "__" read
+// as plain text easy to miss (docs/fixes.md Tier 1). Keeps the number list
+// + blank together on one line via white-space:nowrap and gives the blank
+// a distinct chip instead of two underscores. No-op (plain escaped text)
+// for every other question type.
+function formatQuestionPrompt(question) {
+  if (question.type !== 'sequence') return escapeHtml(question.prompt);
+
+  var match = /^(.*?)([\d]+(?:\s*,\s*[\d]+)*\s*,)\s*__\s*$/.exec(question.prompt);
+  if (!match) return escapeHtml(question.prompt);
+
+  var intro = match[1];
+  var sequence = match[2];
+  return (
+    escapeHtml(intro) +
+    '<span class="sequence-line">' +
+      escapeHtml(sequence) + ' ' +
+      '<span class="sequence-blank" aria-label="missing number">?</span>' +
+    '</span>'
+  );
+}
+
 function progressBar(percent) {
   return '<div class="progress-track" role="progressbar" aria-valuenow="' + percent +
     '" aria-valuemin="0" aria-valuemax="100">' +
@@ -33,7 +56,20 @@ function progressBar(percent) {
 
 function optionButton(action, index, label) {
   return '<button class="btn btn-option" type="button" data-action="' + action +
-    '" data-value="' + index + '">' + escapeHtml(label) + '</button>';
+    '" data-value="' + index + '">' +
+    '<span class="option-label">' + escapeHtml(label) + '</span></button>';
+}
+
+// Grid variant for questions with optionShapes (questions.js): icon +
+// small text label, laid out as a 2x2 grid (see .option-grid /
+// .btn-option-grid in components.css) rather than the text options'
+// single column — these compare naturally side by side, not top-to-bottom.
+function shapeOptionButton(action, index, label, iconSvg) {
+  return '<button class="btn btn-option-grid" type="button" data-action="' +
+    action + '" data-value="' + index + '">' +
+    '<span class="option-icon-wrap">' + iconSvg + '</span>' +
+    '<span class="option-label">' + escapeHtml(label) + '</span>' +
+  '</button>';
 }
 
 // Small inline-SVG mark for the entry hero — three overlapping shapes,
@@ -159,10 +195,30 @@ IQLY.screens = {
 
     var label = formatCopy(copy.questionLabel, { current: answered + 1, total: total });
     var visual = question.render ? question.render() : '';
+    var hasShapeOptions = !!question.optionShapes;
+
+    // Shared across every option's icon for this question — sized to fit
+    // the largest option count — so a 1-shape option renders its shape at
+    // the same absolute size as one shape within a 3-shape option, rather
+    // than each option's icon being cropped to its own count and then
+    // stretched to fill the same cell (see optionIcon()'s comment).
+    var iconCanvasSize = hasShapeOptions
+      ? IQLY.iconCanvasSize(Math.max.apply(null, question.optionShapes.map(function (s) { return s.count; })))
+      : null;
 
     var options = question.options.map(function (opt, i) {
+      if (hasShapeOptions) {
+        var shapeSpec = question.optionShapes[i];
+        var icon = IQLY.optionIcon(shapeSpec.shape, shapeSpec.count, iconCanvasSize);
+        return shapeOptionButton('answer', i, opt, icon);
+      }
       return optionButton('answer', i, opt);
     }).join('');
+
+    // optionShapes questions get the 2x2 icon grid; every other question
+    // type keeps the existing single-column text list, untouched. See
+    // .option-grid / .btn-option-grid in components.css.
+    var optionListClass = hasShapeOptions ? 'option-grid' : 'option-list';
 
     var streakChip = IQLY.CONFIG.progress.showStreak && streak > 0
       ? '<div class="streak-chip">🔥 ' + streak + '</div>'
@@ -185,10 +241,10 @@ IQLY.screens = {
         // buttons below would shift position between questions — a real
         // mis-tap risk on mobile, not just a visual nicety.
         '<div class="question-content">' +
-          '<p class="question-prompt">' + escapeHtml(question.prompt) + '</p>' +
+          '<p class="question-prompt">' + formatQuestionPrompt(question) + '</p>' +
           (visual ? '<div class="question-visual">' + visual + '</div>' : '') +
         '</div>' +
-        '<div class="option-list">' + options + '</div>' +
+        '<div class="' + optionListClass + '">' + options + '</div>' +
       '</div>'
     );
   },
