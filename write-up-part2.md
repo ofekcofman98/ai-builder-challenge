@@ -53,8 +53,7 @@ driven primarily by curiosity about relative standing rather than
 self-insight.
 **Primary KPI**: result → account-created rate (same
 gate, different framing before it). 
-**Guardrail KPI**: time-on-screen
-before click, as a qualitative signal distinguishing engaged
+**Guardrail KPI**: time-on-screen before click, as a qualitative signal distinguishing engaged
 consideration from impulsive action — useful context for interpreting
 the primary metric whichever way it moves. Whichever framing wins
 should also inform Part 3 creative copy, since the two speak to the
