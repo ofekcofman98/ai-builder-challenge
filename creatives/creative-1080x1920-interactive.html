@@ -56,24 +56,58 @@
   }
 
   .headline {
-    margin: 64px 0 8px;
+    margin: 40px 0 8px;
     font-size: 64px;
     font-weight: var(--font-weight-bold);
     line-height: 1.15;
     color: var(--color-text);
   }
-  .subheadline {
-    margin: 0 0 56px;
-    font-size: 32px;
-    color: var(--color-text-muted);
+
+  /* Mirrors creative-1080x1920.html's current header treatment (Build A's
+     source of truth for both builds' shared static chrome) — a FREE badge
+     next to the headline, and a "challenge-tag" line in place of the old
+     subheadline. See that file for the up-to-date rationale on any of
+     this; this file just stays in sync with it. */
+  .headline-row {
+    display: table;
+    width: 100%;
+  }
+  .headline-row .headline {
+    display: table-cell;
+    vertical-align: middle;
+  }
+  .free-badge {
+    display: table-cell;
+    width: 1%;
+    white-space: nowrap;
+    vertical-align: middle;
+    background: var(--color-primary);
+    color: var(--color-primary-contrast);
+    font-size: 28px;
+    font-weight: var(--font-weight-bold);
+    padding: 8px 24px;
+    border-radius: var(--radius-pill);
   }
 
+  /* Matches creative-1080x1920.html's .challenge-tag — see that file's
+     comment (it had no rule at all before this, rendering at the
+     browser-default tiny paragraph size). */
+  .challenge-tag {
+    margin: 0 0 32px;
+    font-size: 34px;
+    font-weight: var(--font-weight-bold);
+    color: var(--color-primary);
+  }
+
+  /* No background/border-radius fill — matches Build A's question-card
+     (see that file's comment: the matrix cells already carry their own
+     border+background, so a second full-card fill read as "card inside a
+     card"). Padding trimmed 48px→32px top/bottom for the same reason as
+     Build A: room for the larger, cell-proportional option icons. */
   .question-card {
     box-sizing: border-box;
     width: 100%;
-    padding: 48px 44px;
-    background: var(--color-surface);
-    border-radius: var(--radius-md);
+    padding: 32px 44px;
   }
   .question-prompt {
     margin: 0 0 36px;
@@ -135,7 +169,7 @@
     display: block;
     box-sizing: border-box;
     width: 100%;
-    margin-top: 72px;
+    margin-top: 40px;
     padding: 0 32px;
     height: 128px;
     line-height: 128px;
@@ -170,8 +204,12 @@
         <span class="wordmark">IQly</span>
       </div>
 
-      <p class="headline">What's your IQ?</p>
-      <p class="subheadline">Free · about 3 minutes · no signup to start</p>
+      <div class="headline-row">
+        <p class="headline">What's your IQ?</p>
+        <span class="free-badge">FREE</span>
+      </div>
+
+      <p class="challenge-tag">Most people miss this one</p>
 
       <div class="question-card">
         <p class="question-prompt" id="question-prompt"></p>

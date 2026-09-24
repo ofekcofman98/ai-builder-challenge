@@ -98,6 +98,40 @@
     margin: 0 0 36px;
   }
 
+  .headline-row {
+  display: table;
+  width: 100%;
+}
+.headline-row .headline {
+  display: table-cell;
+  vertical-align: middle;
+}
+.free-badge {
+  display: table-cell;
+  width: 1%;
+  white-space: nowrap;
+  vertical-align: middle;
+  background: var(--color-primary);
+  color: var(--color-primary-contrast);
+  font-size: 28px;
+  font-weight: var(--font-weight-bold);
+  padding: 8px 24px;
+  border-radius: var(--radius-pill);
+}
+
+/* Had no rule at all before this — fell back to the browser default
+   paragraph size (~16px at this canvas's 1080px scale), tiny next to a
+   64px headline. This is a curiosity hook, not fine print: sized and
+   weighted close to the old .subheadline it replaced (32px), bold and in
+   the brand color so it reads as a challenge/social-proof tag rather than
+   secondary copy. */
+.challenge-tag {
+  margin: 0 0 32px;
+  font-size: 34px;
+  font-weight: var(--font-weight-bold);
+  color: var(--color-primary);
+}
+
   /* Options render as static visual content, not live click targets —
      Build A's whole creative is one clickthrough link (part3-spec.md's
      ad-serving-constraint note: a served image has exactly one URL for
@@ -202,8 +236,12 @@
         <span class="wordmark">IQly</span>
       </div>
 
-      <p class="headline">What's your IQ?</p>
-      <p class="subheadline">Free · about 3 minutes · no signup to start</p>
+      <div class="headline-row">
+        <p class="headline">What's your IQ?</p>
+        <span class="free-badge">FREE</span>
+      </div>
+
+      <p class="challenge-tag">Most people miss this one</p>
 
       <div class="question-card">
         <p class="question-prompt" id="question-prompt"></p>
@@ -217,8 +255,8 @@
            tapped. "Start the quiz" doesn't promise anything the tap
            doesn't deliver, and stays consistent with the honest microcopy
            below it. -->
-      <div class="cta-banner">Start the quiz &rarr;</div>
-      <p class="microcopy">Tap anywhere to jump straight into the quiz</p>
+      <div class="cta-banner">Start the quiz</div>
+      <p class="microcopy">2 min · No signup to start · Tap anywhere to jump straight in</p>
     </div>
   </a>
 

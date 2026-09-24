@@ -105,17 +105,29 @@ ad and the product make the same claim in the same language.
 
 **Implementation notes**:
 - Headline: self-insight framing, e.g. "What's your cognitive
-  strength?" or "Discover your strongest trait" — reuse wording close
-  to `copy.partialResult.standoutLabel` rather than inventing new
-  product language for the ad alone.
-- Subline: value + cost signal, matching the entry screen's existing
-  claim ("Free · about 3 minutes"), not a shorter/different time
-  claim than the app delivers (same reasoning as Creative 1's copy
-  decision).
-- CTA: must promise the self-insight hook specifically ("Find my
-  strength"), not a generic "Start" — the CTA text is where the first
-  build's mismatch actually showed up (promising "find out" after the
-  answer was already visible).
+  strength?" — reuse wording close to `copy.partialResult.standoutLabel`
+  rather than inventing new product language for the ad alone.
+- Subline: **must explicitly say "IQ Test"** — the ad's whole traffic
+  source is a Google Search campaign on the exact keywords "free iq
+  test" / "iq test" (task.md); a headline built entirely around
+  "cognitive strength" with no literal "IQ" mention breaks message
+  match with the search term the visitor just typed. Confirmed
+  missing from the first build — the other two creatives both open
+  with "What's your IQ?"; this one was the outlier and needs the same
+  anchor. Time claim stays "3 min" (or "3-Min"), matching the entry
+  screen's existing "about 3 minutes" claim, phrased as a stated fact
+  rather than a hedge ("about") — e.g. "Take a 3-Min IQ Test." A
+  shorter claim (e.g. "1 min") is explicitly rejected: the quiz is 8
+  questions plus an analyzing/result sequence, and promising a
+  shorter time than the app delivers is the same trust failure the
+  competitive research flagged for the price-symbol competitor
+  (write-up.md) — it just surfaces later in the funnel instead of on
+  first load.
+- CTA: promises the cost/friction removal directly — "Try Free" — 
+  rather than restating the headline's promise a second time. Putting
+  "Free" in the CTA itself (not a small subline) also gives it the
+  visual weight a secondary value prop needs; a gray subline-sized
+  "Free" under-sells the single biggest objection-remover this ad has.
 - No supporting graphic — text-only at this size, by explicit
   decision. `heroMark()`'s SVG mark is still present as the identity
   element, but no additional illustrative content (icon row, pattern
@@ -183,6 +195,44 @@ deliverable.
   option rows' resemblance to real buttons before finalizing (e.g.
   drop the border, lower contrast against the card background) so
   they read as a preview rather than a control.
+- **Challenge copy — no fabricated statistics.** A specific invented
+  claim ("80% got this wrong") is rejected even though the live
+  quiz's mid-quiz percentile toasts use fabricated benchmark numbers
+  as a disclosed trade-off (write-up.md) — that precedent doesn't
+  transfer here: the toasts reach a user already mid-commitment,
+  while ad copy is a pre-click claim made to a stranger, the same
+  trust register as the entry screen's explicit "no fabricated social
+  proof" rule. A specific false numeric claim in outward ad copy also
+  risks ad-platform policy enforcement (unsubstantiated
+  comparative/statistical claims), a real operational risk beyond the
+  trust question alone. Resolved as `.challenge-tag`, reading "Think
+  you can solve it?" — not on the CTA banner, which stays "Start the
+  quiz →" per the honesty fix above.
+- **Text density, revised after review**: the first pass (headline +
+  a full-sentence subheadline + challenge-tag, each its own line,
+  ahead of the question prompt itself) stacked 3 same-weight text
+  lines before the visual hook — more text-forward than Creative 1
+  and 2's restraint, and it buried "Free" inside a run-on sentence
+  competing with two other claims for the same attention. Restructured:
+  - `headline` ("What's your IQ?") and a new `.free-badge` pill
+    ("FREE", `--color-primary` fill, reusing `components.css`'s
+    existing `.streak-chip` pill pattern rather than inventing a new
+    visual primitive) sit on one row together — "Free" gets its own
+    dedicated visual weight instead of small gray text inside a
+    sentence.
+  - `.challenge-tag` ("Think you can solve it?") is the only other
+    line before the question card — headline+badge, then the
+    challenge, then the puzzle. Two visual steps, not three-plus.
+  - The old subheadline's remaining claims ("about 3 minutes", "no
+    signup to start") move down into the existing bottom `microcopy`
+    line, merged with the honest tap-explainer already there — this
+    adds no new line, it consolidates into one that already exists:
+    "About 3 min · No signup to start · Tap anywhere to jump straight
+    into the quiz."
+  Ad copy hierarchy, final: headline+free-badge (brand/keyword/cost,
+  one row) → challenge-tag (desire, right before the puzzle) →
+  question card → CTA (action) → microcopy (secondary reassurance,
+  low visual priority at the bottom, not competing at the top).
 - This is the version exported to `iqly-1080x1920.png` and submitted
   as the required deliverable.
 
@@ -248,9 +298,10 @@ deliverable.
 - [ ] Creative 1: mark + claim + CTA, verify legibility at 320×50
       actual size, not zoomed; confirm CTA is a styled `<span>`, not
       a `<button>` nested inside the wrapping `<a>`
-- [ ] Creative 2: self-insight headline + subline + CTA, text only
-      (no icon row, no pattern graphic); verify CTA wording promises
-      exactly what the headline claims
+- [ ] Creative 2: self-insight headline + "IQ Test"-anchored subline
+      ("Take a 3-Min IQ Test", not a hedge like "about 3 minutes" and
+      not a shorter claim like "1 min") + "Try Free" CTA, text only
+      (no icon row, no pattern graphic)
 - [ ] Creative 3 — Build A: `main.js` reads `skip=entry`, lands user
       directly on Q1; verify no console errors and that `entry`
       screen/soft-entry answer is cleanly bypassed (not just hidden)
