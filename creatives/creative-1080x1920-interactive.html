@@ -83,24 +83,53 @@
     color: var(--color-text);
   }
 
+  .question-visual {
+    text-align: center;
+    margin: 0 0 36px;
+  }
+
   /* Unlike Build A, each option is a real click zone: index.html?q1=<i>
      pre-fills that answer and advances state past Q1 on landing, so the
      user is never re-asked the question they just answered here — see
-     src/main.js's readAnswerParam(). */
+     src/main.js's readAnswerParam(). q1 is now the icon-rendered matrix
+     question (see questions.js's comment on q1 for why it moved to this
+     position), so options render as a 2x2 icon grid rather than a single
+     text column — same table-cell approach as Build A's .option-grid-table
+     (wkhtmltoimage predates CSS Grid; see creatives/export.js), but each
+     cell is a real per-answer link here instead of static preview content. */
+  .option-grid-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 20px;
+    margin: -20px;
+  }
   a.option {
     display: block;
     box-sizing: border-box;
     width: 100%;
-    margin-bottom: 20px;
-    padding: 30px 32px;
+    padding: 32px;
     background: var(--color-bg);
     border: 2px solid var(--color-border);
     border-radius: var(--radius-sm);
-    font-size: 36px;
-    color: var(--color-text);
+    text-align: center;
     text-decoration: none;
   }
-  a.option:last-child { margin-bottom: 0; }
+  /* No width/height here — sized in JS as a percentage of each option's
+     own rendered width instead. Same fix as creative-1080x1920.html's
+     .option-cell .option-icon (identical hardcoded-96px issue, separate
+     stylesheet); see that file's comment on why not CSS aspect-ratio.
+     Build B is never exported through wkhtmltoimage, but keeping both
+     creatives on the same sizing approach avoids two different bugs to
+     track for what's visually the same component. */
+  a.option .option-icon {
+    display: block;
+    margin: 0 auto 16px;
+  }
+  a.option .option-label {
+    display: block;
+    font-size: 32px;
+    color: var(--color-text);
+  }
 
   a.cta-banner {
     display: block;
@@ -146,7 +175,8 @@
 
       <div class="question-card">
         <p class="question-prompt" id="question-prompt"></p>
-        <div id="option-list"></div>
+        <div class="question-visual" id="question-visual"></div>
+        <table class="option-grid-table" role="presentation" id="option-grid"></table>
       </div>
 
       <!-- Fallback for a viewer who taps outside an answer: still lands
@@ -158,29 +188,74 @@
   </div>
 
   <!-- Real question content, not invented: pulls q1 straight from the
-       quiz source. Deliberately stays on q1 even though Build A (the PNG
-       deliverable) moved to q6's icon-rendered pattern options — this
-       creative's whole mechanism (?qN=<index> pre-fills that answer and
-       advances state past it) only ever works for the FIRST unanswered
-       question: src/main.js's readAnswerParam() guards on
-       `questionIndex === state.getAnswers().length`, which is 0 on a
-       fresh page load. A ?q6=<index> link would always be rejected — the
-       app has no way to validly skip straight to question 6 without the
-       5 preceding answers recorded. q1 also has no optionShapes (it's a
-       sequence question, plain numeric options), so there's no icon
-       version of it to show even visually. -->
+       quiz source. q1 is the icon-rendered 3x3 matrix question (moved to
+       this array position specifically so this creative's deep link could
+       target it — see questions.js's comment on q1); this creative's whole
+       mechanism (?qN=<index> pre-fills that answer and advances state past
+       it) only ever works for the FIRST unanswered question — src/main.js's
+       readAnswerParam() parses the index straight from the qN param name
+       and only honors index 0 — so q1 is the only question this deep link
+       could ever validly target, which is exactly why it moved here rather
+       than staying at position 6. -->
   <script src="../src/questions.js"></script>
   <script>
     (function () {
       var q = IQLY.QUESTIONS.filter(function (item) { return item.id === 'q1'; })[0];
+
+      // window.__IQLY_TOKENS__ is set only by creatives/export.js's export
+      // pass — see creative-1080x1920.html's identical helper for why.
+      function resolveTokens(svgMarkup) {
+        if (!window.__IQLY_TOKENS__) return svgMarkup;
+        return svgMarkup.replace(/var\((--[a-z0-9-]+)\)/gi, function (full, name) {
+          return window.__IQLY_TOKENS__[name] || full;
+        });
+      }
+
       document.getElementById('question-prompt').textContent = q.prompt;
 
-      var listEl = document.getElementById('option-list');
+      var visualEl = document.getElementById('question-visual');
+      visualEl.innerHTML = resolveTokens(q.render());
+
+      // svgGridMatrix() ships explicit width/height pixel attributes sized
+      // for the live quiz's compact question-content budget — pin this
+      // creative's own larger target size the same way Build A does.
+      var visualSvg = visualEl.getElementsByTagName('svg')[0];
+      var vb = visualSvg.getAttribute('viewBox').split(' ');
+      var vbWidth = parseFloat(vb[2]);
+      var vbHeight = parseFloat(vb[3]);
+      var targetWidth = 600;
+      visualSvg.setAttribute('width', targetWidth);
+      visualSvg.setAttribute('height', Math.round((vbHeight / vbWidth) * targetWidth));
+
+      // Shared canvas size across all 4 options — see src/questions.js's
+      // optionIcon() comment for why a per-option size is wrong.
+      var maxCount = Math.max.apply(null, q.optionShapes.map(function (s) { return s.count; }));
+      var iconCanvasSize = IQLY.iconCanvasSize(maxCount);
+
+      var gridEl = document.getElementById('option-grid');
       var html = '';
       q.options.forEach(function (option, i) {
-        html += '<a class="option" href="../index.html?q1=' + i + '" target="_top">' + option + '</a>';
+        var shapeSpec = q.optionShapes[i];
+        var icon = resolveTokens(IQLY.optionIcon(shapeSpec.shape, shapeSpec.count, iconCanvasSize));
+        if (i % 2 === 0) html += '<tr>';
+        html += '<td><a class="option" href="../index.html?q1=' + i + '" target="_top">' +
+          icon + '<span class="option-label">' + option + '</span></a></td>';
+        if (i % 2 === 1) html += '</tr>';
       });
-      listEl.innerHTML = html;
+      gridEl.innerHTML = html;
+
+      // Icon = 44% of its own option's rendered width — see .option-icon's
+      // comment. Sized against the <a>, not the <td>, since the <a> is the
+      // element with the actual padding/border box the icon sits inside.
+      var options = gridEl.getElementsByClassName('option');
+      Array.prototype.forEach.call(options, function (optionEl) {
+        var icon = optionEl.getElementsByClassName('option-icon')[0];
+        var size = Math.round(optionEl.clientWidth * 0.44);
+        icon.setAttribute('width', size);
+        icon.setAttribute('height', size);
+        icon.style.width = size + 'px';
+        icon.style.height = size + 'px';
+      });
     })();
   </script>
 </body>

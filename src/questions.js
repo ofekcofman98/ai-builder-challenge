@@ -11,10 +11,16 @@
   optionShapes (additive, optional): parallel array to `options`, one
   {shape, count} per option, rendered as a small monochrome icon next to
   the option text via optionIcon() below — see screens.js's quiz(). Only
-  present where an option's meaning reduces cleanly to shape+count (q3,
-  q6); q4's options ("a rectangle", "a rotated square") aren't expressible
+  present where an option's meaning reduces cleanly to shape+count (q1,
+  q3); q4's options ("a rectangle", "a rotated square") aren't expressible
   in shapeMarkup()'s vocabulary, so it stays text-only rather than forcing
   a mismatched icon.
+
+  q1 is a 3x3 matrix pattern question, not the simple sequence question
+  the "easy first" framing below might imply — it lives at position 0
+  specifically so the ad creative's per-answer deep link can target it
+  (see q1's own comment for the full reasoning and the difficulty-curve
+  trade-off that decision accepted).
 */
 
 var IQLY = window.IQLY || {};
@@ -218,14 +224,51 @@ IQLY.SOFT_ENTRY_QUESTION = {
 };
 
 IQLY.QUESTIONS = [
-  // Easy first two — early wins reduce early-abandonment risk.
+  // q1 is now the 3x3 matrix pattern question (formerly q6) — moved here
+  // specifically so creative-1080x1920-interactive.html's per-answer deep
+  // link (?q1=<index>) can target it: src/main.js's readAnswerParam()
+  // parses the question index straight from the qN query-param NAME (not
+  // from any question's `id` field), matched against array position, and
+  // only ever honors index 0 (the first unanswered question) — see that
+  // file's comment. There is no app mechanism to deep-link to an
+  // arbitrary later question, so putting the matrix at array position 0
+  // was the only way to make Build B show a deep-linkable icon-grid
+  // question at all, per the user's explicit choice among the options
+  // presented (see AI_WORKFLOW.md's dated entry).
+  //
+  // Trade-off, called out rather than silently absorbed: this question was
+  // originally placed at position 6 specifically as part of a "hardest
+  // cluster around Q6-Q7" difficulty curve, with q1/q2 deliberately easy
+  // ("early wins reduce early-abandonment risk"). Opening the quiz with a
+  // 3x3 arithmetic matrix instead of a simple sequence question works
+  // against that curve. Accepted here because the ad-creative deep-link
+  // requirement was explicit; if the difficulty-curve concern outweighs
+  // it later, the fix is either accepting Build B stays q1-only-in-spirit
+  // (the "keep Build B on the old q1" option) or adding real app support
+  // for skipping to an arbitrary question index.
   {
     id: 'q1',
-    type: 'sequence',
-    category: 'sequence',
-    prompt: 'What comes next in the sequence? 2, 4, 6, 8, __',
-    options: ['9', '10', '12', '16'],
-    correctIndex: 1,
+    type: 'pattern',
+    category: 'pattern',
+    prompt: 'Which shape completes the pattern?',
+    render: function () {
+      return svgGridMatrix([
+        [{ shape: 'square', count: 1 }, { shape: 'square', count: 2 }, { shape: 'square', count: 3 }],
+        [{ shape: 'triangle', count: 1 }, { shape: 'triangle', count: 2 }, { shape: 'triangle', count: 3 }],
+        [{ shape: 'circle', count: 1 }, { shape: 'circle', count: 2 }, { shape: 'blank' }],
+      ]);
+    },
+    // Distractors: 6 continues the diagonal sequence (1,3,5.. not the row
+    // rule); 7 sums across rows instead of within a row; 9 is a generic
+    // increasing guess. 8 (3+5) is correct and deliberately not first.
+    options: ['3 triangles', '2 circles', '3 circles', '2 squares'],
+    optionShapes: [
+      { shape: 'triangle', count: 3 },
+      { shape: 'circle', count: 2 },
+      { shape: 'circle', count: 3 },
+      { shape: 'square', count: 2 },
+    ],
+    correctIndex: 2,
   },
   {
     id: 'q2',
@@ -294,36 +337,18 @@ IQLY.QUESTIONS = [
     options: ['4 - 9 - 2 - 7', '7 - 2 - 9 - 4', '4 - 2 - 9 - 7', '9 - 2 - 7 - 4'],
     correctIndex: 0,
   },
-  // Hardest cluster around Q6–Q7. Upgraded from a single-row shape-count
-  // sequence to a real 3x3 matrix — see AI_WORKFLOW.md's dated entry for
-  // why (the ad creative needed a genuinely non-trivial pattern question,
-  // not "one more shape than last time"). One shape (circle) throughout,
-  // one rule: each row's 3rd cell is the sum of its first two cells'
-  // counts (1+2=3, 2+3=5, 3+5=?). Deliberately not a row-identity /
-  // column-count dual-rule grid, to avoid resembling that pattern family.
+  // Formerly q1 — the matrix pattern question that used to live here moved
+  // to array position 0 (see that question's comment for why). This plain
+  // sequence question took its place so the "hardest cluster around
+  // Q6-Q7" slot still has *a* question in it, even though the difficulty
+  // curve this was meant to preserve is now broken by the swap above.
   {
     id: 'q6',
-    type: 'pattern',
-    category: 'pattern',
-    prompt: 'Which shape completes the pattern?',
-    render: function () {
-      return svgGridMatrix([
-        [{ shape: 'square', count: 1 }, { shape: 'square', count: 2 }, { shape: 'square', count: 3 }],
-        [{ shape: 'triangle', count: 1 }, { shape: 'triangle', count: 2 }, { shape: 'triangle', count: 3 }],
-        [{ shape: 'circle', count: 1 }, { shape: 'circle', count: 2 }, { shape: 'blank' }],
-      ]);
-    },
-    // Distractors: 6 continues the diagonal sequence (1,3,5.. not the row
-    // rule); 7 sums across rows instead of within a row; 9 is a generic
-    // increasing guess. 8 (3+5) is correct and deliberately not first.
-    options: ['3 triangles', '2 circles', '3 circles', '2 squares'],
-    optionShapes: [
-      { shape: 'triangle', count: 3 },
-      { shape: 'circle', count: 2 },
-      { shape: 'circle', count: 3 },
-      { shape: 'square', count: 2 },
-    ],
-    correctIndex: 2,
+    type: 'sequence',
+    category: 'sequence',
+    prompt: 'What comes next in the sequence? 2, 4, 6, 8, __',
+    options: ['9', '10', '12', '16'],
+    correctIndex: 1,
   },
   {
     id: 'q7',

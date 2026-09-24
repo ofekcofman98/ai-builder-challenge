@@ -20,6 +20,106 @@ Entry format:
 
 ---
 
+## 2026-09-24 — Build A/B visual polish: card fill, icon sizing, CTA wording
+
+**Decision:** three fixes to `creative-1080x1920.html` (Build A) and
+`creative-1080x1920-interactive.html` (Build B), all user-reported from an actual
+rendered screenshot:
+
+1. Removed `.question-card`'s `var(--color-surface)` background/border-radius fill.
+   The matrix cells already carry their own border+background from
+   `svgGridMatrix()`'s render, so a second full-card gray background underneath read
+   as "card inside a card" — visibly heavier than Creative 1 and Creative 2, both
+   plain white. Padding kept; only the fill removed.
+2. Fixed `.option-icon`'s hardcoded 96px width/height in both creative files' own
+   stylesheets — the same unrelated-numbers bug already fixed once in
+   `components.css`'s live-app answer grid, recurring here because these two files
+   ship separate CSS that was never updated with that fix. Icons now size as 44% of
+   their own cell/option's rendered width, computed in JS (not CSS `aspect-ratio`,
+   which the export renderer doesn't support — see below).
+3. Reworded Build A's CTA banner from "Answer this question →" to "Start the quiz →"
+   — every tap on Build A, including a tap directly on one option, goes to the same
+   `?skip=entry` destination regardless of which option was tapped, so the old
+   wording implied in-place interactivity the ad doesn't have. The microcopy below it
+   ("Tap anywhere to jump straight into the quiz") was already honest; the CTA above
+   it wasn't quite consistent with that.
+
+**Considered (icon sizing specifically):** CSS `aspect-ratio: 1/1` on a
+percentage-width icon, matching the live app's `.option-icon-wrap` fix — tried first,
+and confirmed via a real export (not assumed) that wkhtmltoimage's WebKit-based
+renderer silently collapses it to 0 height, since `aspect-ratio` postdates that
+engine. Replaced with explicit pixel `width`/`height` set in JS from each icon's
+own cell's `clientWidth` after layout — the same category of fix already used
+elsewhere in these files (the question-visual SVG's explicit dimensions) for the
+same underlying reason: this renderer needs sizes it doesn't have to compute itself.
+
+**Why (a fourth issue found during verification, not requested but necessary):**
+the larger icons (44% of a ~456px cell vs. a fixed 96px) added real height, pushing
+Build A's total content 103px past the fixed 1920px canvas — confirmed via Puppeteer
+(`content.scrollHeight` vs. 1920), not assumed, and visible in the first re-export as
+a garbled double-page artifact. Trimmed `.headline`'s top margin (64→40px),
+`.subheadline`'s bottom margin (56→32px), `.question-card`'s top/bottom padding
+(48→32px), and `.cta-banner`'s top margin (72→40px) — 112px of freed room for 103px
+of overflow. Re-measured at 0px overflow before re-exporting.
+
+**AI's role:** Claude implemented all three requested fixes, then caught the
+resulting overflow bug during its own verification pass (re-exporting and viewing the
+PNG before declaring done, per this session's standing instruction to verify against
+real output rather than assume a CSS change is correct) and fixed it in the same
+pass rather than shipping a broken export. The icon-sizing approach (JS-computed
+pixels instead of CSS aspect-ratio) was Claude's diagnosis of why the first attempt
+silently failed on this specific renderer, not a user-specified fix.
+
+---
+
+## 2026-09-24 — Matrix pattern question moved from q6 to q1, for Build B's deep link
+
+**Decision:** swapped the content of `q1` and `q6` in `src/questions.js`. The 3x3
+matrix pattern question (icon-rendered options, previously at array position 5, id
+`q6`) now lives at position 0, id `q1`. The plain sequence question that used to be
+`q1` ("What comes next? 2, 4, 6, 8, __") took its old place at position 5, id `q6`.
+`creative-1080x1920.html` (Build A) and `creative-1080x1920-interactive.html`
+(Build B) were both updated to pull `q1` instead of `q6`; Build B was also rebuilt
+from a plain text-option list into a 2x2 icon-grid of real per-answer deep links
+(mirroring Build A's visual, but clickable), and both PNGs were re-exported.
+
+**Considered:** three options, presented to the user directly because this was a
+genuine product trade-off, not a pure implementation choice —
+1. Keep Build B on the old q1 (plain sequence), leave the matrix at q6, and accept
+   that Build B's per-answer deep-linking simply can't showcase the icon-grid
+   mechanic.
+2. Extend the app (`state.js`/`main.js`) with real logic to pre-fill/skip the first 5
+   answers so a `?q6=<index>` link could validly land on q6.
+3. Move the matrix question itself to array position 0, so the *existing* deep-link
+   mechanism (which only ever honors index 0 — see `main.js`'s `readAnswerParam()`)
+   works for it without any app-logic changes. **Chosen.**
+
+**Why:** `main.js`'s `readAnswerParam()` parses the target question index straight
+from the `qN` query-param's name (not from any question's `id` field) and only
+honors it when `questionIndex === state.getAnswers().length` — i.e., only the first
+unanswered question, always index 0, on a fresh page load. There is no mechanism to
+validly deep-link to question 6 without the 5 preceding answers already recorded, so
+option 2 would have meant real app behavior changes just to serve one ad creative.
+Option 3 solves the constraint by construction — whatever question sits at array
+position 0 is automatically the only one Build B *can* deep-link to — at the cost of
+breaking the quiz's original "easy first two, hardest cluster around Q6-Q7" difficulty
+curve: the quiz now opens with a genuinely harder matrix question instead of a simple
+sequence one. Accepted explicitly by the user as the trade-off worth taking; called out
+in `questions.js`'s comments rather than silently absorbed, in case the difficulty-curve
+concern outweighs it later (at which point option 1 or 2 above are the fallback paths).
+
+**AI's role:** Claude surfaced the technical constraint (the deep-link mechanism's
+index-0-only guard) that the user's original request — "use q6 in both creative
+files" — would have silently violated, presented the three options above via
+`AskUserQuestion` rather than picking one unilaterally, and implemented the chosen
+swap end-to-end: content swap in `questions.js`, both creative files repointed to
+`q1`, Build B rebuilt from a text list to a clickable icon grid, and the whole path
+verified live via Puppeteer (confirmed clicking Build B's first option lands on
+`index.html?q1=0` and correctly advances to "Question 2 of 8", not just that the
+markup looked right).
+
+---
+
 ## 2026-09-24 — q6 screen: dead-space, matrix size, and answer-card proportion fixes
 
 **Decision:** three related layout fixes to the q6 quiz screen, each verified with

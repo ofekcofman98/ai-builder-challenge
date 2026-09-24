@@ -55,24 +55,35 @@
   }
 
   .headline {
-    margin: 64px 0 8px;
+    margin: 40px 0 8px;
     font-size: 64px;
     font-weight: var(--font-weight-bold);
     line-height: 1.15;
     color: var(--color-text);
   }
   .subheadline {
-    margin: 0 0 56px;
+    margin: 0 0 32px;
     font-size: 32px;
     color: var(--color-text-muted);
   }
 
+  /* No background/border-radius fill here (deliberate — was
+     var(--color-surface) originally): the matrix cells already carry
+     their own border+background from svgGridMatrix()'s render, so a
+     second full-card gray background stacked underneath read as "card
+     inside a card" and was visibly heavier than Creative 1 and Creative
+     2, which are both plain white. Padding stays; only the fill is
+     gone.
+
+     Top/bottom padding trimmed from 48px to 32px — freed room for the
+     option icons growing from a fixed 96px to 44% of their (much wider)
+     cell, which pushed total content past the fixed 1920px canvas height
+     by 103px (measured via Puppeteer, not assumed) once the icon fix
+     landed. Left/right padding unchanged. */
   .question-card {
     box-sizing: border-box;
     width: 100%;
-    padding: 48px 44px;
-    background: var(--color-surface);
-    border-radius: var(--radius-md);
+    padding: 32px 44px;
   }
   .question-prompt {
     margin: 0 0 36px;
@@ -98,12 +109,18 @@
      elsewhere in creatives/: wkhtmltoimage's export renderer predates
      CSS Grid support entirely (see creatives/export.js).
 
-     Deliberately NOT styled like the live quiz's real answer buttons
-     (bordered box, surface background, full-contrast text) — that
-     similarity was confirmed as a defect in the first build, inviting a
-     tap on one specific option expecting it to register an answer, when
-     every tap goes to the same ?skip=entry destination. Muted, unbordered
-     tiles read as a preview, not a control. */
+     An earlier version of this file deliberately left these unstyled
+     (no border/background) to avoid looking tappable, on the theory that
+     a bordered look would invite a tap on one specific option expecting
+     it to register an answer. Reversed per direct user request: the CTA
+     now reads "Start the quiz" (not "Answer this question") and the
+     microcopy already says "tap anywhere", so the single-link behavior is
+     communicated in words rather than by deliberately making the options
+     look inert — and matching src/questions.js's optionIcon() card
+     treatment (see .option-icon-wrap in components.css) makes the ad's
+     visual promise match the live quiz more closely, same principle as
+     pulling the question content itself from questions.js instead of
+     retyping it. */
   .option-grid-table {
     width: 100%;
     border-collapse: separate;
@@ -116,10 +133,21 @@
     padding: 32px;
     text-align: center;
     vertical-align: middle;
+    background: var(--color-surface);
+    border: 2px solid var(--color-border);
+    border-radius: var(--radius-md);
   }
+  /* No width/height here — sized in JS as a percentage of each cell's own
+     rendered width instead (see the script below). Same unrelated-numbers
+     bug already fixed once in components.css's live-app answer grid
+     (.btn-option-grid .option-icon-wrap), recurring here because this
+     creative has its own separate stylesheet that was never updated with
+     that fix. CSS aspect-ratio would be the obvious fix in a real browser,
+     but wkhtmltoimage's export renderer (see creatives/export.js) predates
+     it — it silently collapsed the icon to 0 height when tried, same
+     "renderer doesn't support the modern CSS property" class of bug as
+     Grid/flexbox elsewhere in creatives/. */
   .option-cell .option-icon {
-    width: 96px;
-    height: 96px;
     display: block;
     margin: 0 auto 16px;
   }
@@ -132,7 +160,7 @@
   .cta-banner {
     box-sizing: border-box;
     width: 100%;
-    margin-top: 72px;
+    margin-top: 40px;
     padding: 0 32px;
     height: 128px;
     line-height: 128px;
@@ -156,12 +184,11 @@
   <!-- Single click-through target for the whole creative: Build A's
        deep link (see part3-spec.md, src/main.js's readSkipParam) lands
        the user directly on the quiz's actual Q1, skipping the entry/
-       soft-entry screen. Q6 is shown above as the hook (a pattern
-       question demonstrates the icon-rendered-options mechanic better
-       than q1's plain sequence numbers) — landing still opens on the
-       quiz's real first question, not q6 specifically; the microcopy
-       below ("jump straight into the quiz") is deliberately generic
-       about which question comes next rather than promising this one. -->
+       soft-entry screen. Q1 is now the 3x3 matrix pattern question (moved
+       here from the old q6 slot specifically so Build B's per-answer deep
+       link could target it — see questions.js's comment on q1), so this
+       ad's hook and the quiz's real first question are now the same
+       question, not just the same mechanic. -->
   <a class="wrap" href="../index.html?skip=entry" target="_top" style="text-decoration:none;color:inherit;">
     <div class="content">
       <div class="header">
@@ -184,12 +211,18 @@
         <table class="option-grid-table" role="presentation" id="option-grid"></table>
       </div>
 
-      <div class="cta-banner">Answer this question &rarr;</div>
+      <!-- "Answer this question" implied in-place interactivity — every
+           tap here, including a tap directly on one option, goes to the
+           same ?skip=entry destination regardless of which option was
+           tapped. "Start the quiz" doesn't promise anything the tap
+           doesn't deliver, and stays consistent with the honest microcopy
+           below it. -->
+      <div class="cta-banner">Start the quiz &rarr;</div>
       <p class="microcopy">Tap anywhere to jump straight into the quiz</p>
     </div>
   </a>
 
-  <!-- Real question content, not invented: pulls q6 straight from the
+  <!-- Real question content, not invented: pulls q1 straight from the
        quiz source — the icon-rendered options match what the live quiz
        now actually shows for pattern questions (questions.js's
        optionShapes / screens.js's quiz(), added after this ad was first
@@ -198,7 +231,7 @@
   <script src="../src/questions.js"></script>
   <script>
     (function () {
-      var q = IQLY.QUESTIONS.filter(function (item) { return item.id === 'q6'; })[0];
+      var q = IQLY.QUESTIONS.filter(function (item) { return item.id === 'q1'; })[0];
 
       // window.__IQLY_TOKENS__ is set only by creatives/export.js's export
       // pass, for a renderer without CSS custom-property support —
@@ -254,6 +287,19 @@
         if (i % 2 === 1) html += '</tr>';
       });
       gridEl.innerHTML = html;
+
+      // Icon = 44% of its own cell's rendered width, both dimensions set
+      // explicitly in JS (see .option-icon's comment for why not CSS
+      // aspect-ratio: unsupported by the export renderer).
+      var cells = gridEl.getElementsByClassName('option-cell');
+      Array.prototype.forEach.call(cells, function (cell) {
+        var icon = cell.getElementsByClassName('option-icon')[0];
+        var size = Math.round(cell.clientWidth * 0.44);
+        icon.setAttribute('width', size);
+        icon.setAttribute('height', size);
+        icon.style.width = size + 'px';
+        icon.style.height = size + 'px';
+      });
     })();
   </script>
 </body>
