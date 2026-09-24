@@ -93,6 +93,10 @@ IQLY.CONFIG = {
     },
     partialResult: {
       standoutLabel: 'Your Standout Strength',
+      // Frames the curve visual below without giving away the number it
+      // represents — the position is the teaser, not the label.
+      percentileTeaserLabel: 'See where you rank',
+      percentileMarkerLabel: 'You',
       // No separate CTA copy: the email field is inline on this screen
       // (copy.emailGate.headline/cta double as its own copy) — no
       // intermediate click on the steepest modeled funnel drop-off.

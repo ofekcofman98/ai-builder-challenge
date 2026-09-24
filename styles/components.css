@@ -291,26 +291,23 @@
   text-transform: capitalize;
 }
 
-.score-locked {
+/* Percentile teaser — a bell curve with a single "you are here" marker
+   (screens.js percentileCurve()), no exact number anywhere on this
+   screen. The SVG is intrinsically responsive (viewBox + width:100%), so
+   it scales correctly down to ~360px without clipping. */
+.percentile-teaser {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
   gap: var(--space-2);
   padding: var(--space-4);
   border: 1px dashed var(--color-border);
   border-radius: var(--radius-md);
-  filter: blur(0.2px);
 }
 
-.score-locked-icon {
-  font-size: var(--font-size-lg);
-}
-
-.score-locked-value {
-  font-size: var(--font-size-xxl);
-  font-weight: var(--font-weight-bold);
-  letter-spacing: 0.1em;
-  color: var(--color-text-muted);
+.percentile-curve {
+  width: 100%;
+  max-width: 320px;
 }
 
 .trust-badge {

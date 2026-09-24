@@ -49,6 +49,54 @@ function heroMark() {
   );
 }
 
+// Percentile teaser for partialResult: a bell curve with a single "you are
+// here" marker, no exact number rendered anywhere — the curve position
+// does the teasing, the real percentile stays behind the email gate.
+// Colors come from tokens.css via var(), same pattern as heroMark/svgGrid.
+function percentileCurve(percentile, markerLabel) {
+  var width = 320;
+  var height = 120;
+  var baseline = 96;
+  var amplitude = 76;
+  var sigma = 18;
+
+  function curveY(x) {
+    var exponent = -((x - 50) * (x - 50)) / (2 * sigma * sigma);
+    return baseline - amplitude * Math.exp(exponent);
+  }
+
+  var points = [];
+  for (var x = 0; x <= 100; x += 2.5) {
+    points.push(((x / 100) * width).toFixed(1) + ',' + curveY(x).toFixed(1));
+  }
+  var linePath = 'M' + points.join(' L');
+  var areaPath = linePath + ' L' + width + ',' + baseline + ' L0,' + baseline + ' Z';
+
+  var markerX = (percentile / 100) * width;
+  var markerY = curveY(percentile);
+  // Keeps the "You" text on-canvas even when the marker sits near either
+  // edge (a percentile near 1 or 99) — the marker itself stays accurate.
+  var labelX = Math.max(24, Math.min(width - 24, markerX));
+
+  return (
+    '<svg class="percentile-curve" viewBox="0 0 ' + width + ' ' + height +
+      '" width="100%" height="auto" preserveAspectRatio="xMidYMid meet" aria-hidden="true">' +
+      '<line x1="0" y1="' + baseline + '" x2="' + width + '" y2="' + baseline +
+        '" stroke="var(--color-border)" stroke-width="1"/>' +
+      '<path d="' + areaPath + '" fill="var(--color-surface)"/>' +
+      '<path d="' + linePath + '" fill="none" stroke="var(--color-primary)" stroke-width="2"/>' +
+      '<line x1="' + markerX.toFixed(1) + '" y1="' + markerY.toFixed(1) + '" x2="' + markerX.toFixed(1) +
+        '" y2="' + baseline + '" stroke="var(--color-primary)" stroke-width="1" stroke-dasharray="2,3"/>' +
+      '<circle cx="' + markerX.toFixed(1) + '" cy="' + markerY.toFixed(1) +
+        '" r="6" fill="var(--color-primary)" stroke="var(--color-bg)" stroke-width="2"/>' +
+      '<text x="' + labelX.toFixed(1) + '" y="' + (markerY - 12).toFixed(1) +
+        '" text-anchor="middle" font-size="11" font-weight="600" fill="var(--color-primary)">' +
+        escapeHtml(markerLabel) +
+      '</text>' +
+    '</svg>'
+  );
+}
+
 // Shared by the emailGate screen (mid-quiz / full-reveal-before-result
 // paths) and the inline field on partialResult (baseline path) — same
 // markup, same data-role hooks, so render.js's handleEmailSubmit() works
@@ -186,9 +234,9 @@ IQLY.screens = {
           '<h2>' + escapeHtml(standoutLabel) + '</h2>' +
         '</div>' +
         '<div class="category-list">' + secondary + '</div>' +
-        '<div class="score-locked" aria-hidden="true">' +
-          '<span class="score-locked-icon">🔒</span>' +
-          '<span class="score-locked-value">???</span>' +
+        '<div class="percentile-teaser">' +
+          '<span class="text-muted">' + escapeHtml(copy.percentileTeaserLabel) + '</span>' +
+          percentileCurve(result.percentile, copy.percentileMarkerLabel) +
         '</div>' +
         '<p class="trust-badge text-muted">' + escapeHtml(copy.trustBadge) + '</p>' +
         // Email captured inline, right here — this is the steepest
