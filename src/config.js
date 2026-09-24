@@ -118,10 +118,11 @@ IQLY.CONFIG = {
       archetypeLabel: 'Your Archetype',
       shareCta: 'Share your result',
       shareCopiedMessage: 'Result copied — paste it anywhere!',
-      // Low-key, text-style entry point into the upsell screen — this is
-      // the account's already been created, so nothing here is measured
-      // as part of the funnel; it doesn't need CTA-level visual weight.
-      unlockMoreCta: 'Unlock more with IQly',
+      // Benefit-led, not urgency-led: names what's on the other side
+      // (growth/mastery motivation) rather than pressuring a decision —
+      // stays consistent with the "no pressure" framing on the upsell
+      // screen itself.
+      unlockMoreCta: 'See how you improve over time →',
     },
     // Wording for scoring.js's categoryLabel() tiers — replaces a raw
     // percentage, which is falsely precise given ~1-2 questions/category.

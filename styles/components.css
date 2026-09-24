@@ -45,18 +45,20 @@
   background: var(--color-border);
 }
 
-/* Text-only, low-emphasis button — the fullResult -> upsell entry point.
-   Keeps the same tap-target height as every other button (accessibility),
-   just without the visual weight of a real CTA. */
-.btn-link {
-  background: none;
-  border: none;
+/* Accent button — the fullResult -> upsell entry point. A real, visually
+   distinct CTA (not a bare text link), but an outlined one: solid
+   .btn-primary stays reserved for the core flow's own actions (quiz,
+   email gate), so this reads as "a genuine offer" without competing with
+   or outranking the actions that actually complete the funnel. */
+.btn-accent {
+  background: var(--color-bg);
   color: var(--color-primary);
+  border: 2px solid var(--color-primary);
   width: 100%;
 }
 
-.btn-link:hover {
-  text-decoration: underline;
+.btn-accent:hover {
+  background: var(--color-surface);
 }
 
 .btn.is-disabled,

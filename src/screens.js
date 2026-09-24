@@ -309,9 +309,10 @@ IQLY.screens = {
         '</button>' +
         // Post-signup only — the account already exists, so this can't
         // dilute the measured funnel (account creations / page visits).
-        // Deliberately low visual weight next to Share: this is a detour,
-        // not the point of the screen.
-        '<button class="btn btn-link" type="button" data-action="view-upsell">' +
+        // Styled to stand out (accent border, not solid — that's reserved
+        // for the core flow's own CTAs) so it reads as a real offer, not
+        // an afterthought link.
+        '<button class="btn btn-accent" type="button" data-action="view-upsell">' +
           escapeHtml(copy.unlockMoreCta) +
         '</button>' +
       '</div>'
