@@ -96,6 +96,11 @@ IQLY.CONFIG = {
     },
     partialResult: {
       standoutLabel: 'Your Standout Strength',
+      // Part 2 Test 3 (result.leadWith: 'percentileRank') swaps the
+      // headline card above from personal insight to competitive standing —
+      // self-understanding vs. social-comparison motivation (docs/part2-spec.md).
+      percentileLeadLabel: 'Your Ranking',
+      percentileLeadHeadline: 'Higher than {percentile}% of test-takers',
       // Frames the curve visual below without giving away the number it
       // represents — the position is the teaser, not the label.
       percentileTeaserLabel: 'See where you rank',

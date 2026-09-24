@@ -217,6 +217,15 @@ IQLY.screens = {
       ? result.standout.charAt(0).toUpperCase() + result.standout.slice(1)
       : '';
 
+    // Part 2 Test 3: which motivation the headline card leads with —
+    // self-understanding (standout strength, baseline) or social
+    // comparison (percentile rank) — see docs/part2-spec.md.
+    var leadWithPercentile = IQLY.CONFIG.result.leadWith === 'percentileRank';
+    var leadLabel = leadWithPercentile ? copy.percentileLeadLabel : copy.standoutLabel;
+    var leadHeadline = leadWithPercentile
+      ? formatCopy(copy.percentileLeadHeadline, { percentile: result.percentile })
+      : standoutLabel;
+
     var secondary = Object.keys(result.categories)
       .filter(function (cat) { return cat !== result.standout; })
       .map(function (cat) {
@@ -230,8 +239,8 @@ IQLY.screens = {
     return (
       '<div class="screen screen-partial-result">' +
         '<div class="card standout-card">' +
-          '<span class="text-muted">' + escapeHtml(copy.standoutLabel) + '</span>' +
-          '<h2>' + escapeHtml(standoutLabel) + '</h2>' +
+          '<span class="text-muted">' + escapeHtml(leadLabel) + '</span>' +
+          '<h2>' + escapeHtml(leadHeadline) + '</h2>' +
         '</div>' +
         '<div class="category-list">' + secondary + '</div>' +
         '<div class="percentile-teaser">' +

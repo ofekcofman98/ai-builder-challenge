@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-  <title>IQly — Variant 2: No Mid-Quiz Feedback</title>
+  <title>IQly — Variant 2: Shorter Quiz</title>
   <link rel="icon" href="data:," />
 
   <link rel="stylesheet" href="styles/tokens.css" />
@@ -23,12 +23,16 @@
   <script src="src/debug.js"></script>
 
   <script>
-    // TEST 2 — funnel step: quiz start -> quiz completion.
-    // Hypothesis (placeholder, to be finalized in Part 2 write-up): the
-    // percentile toasts are a distraction cost, not a retention lift, for
-    // this audience — removing them may reduce mid-quiz drop-off.
-    IQLY.CONFIG.feedback.toastsAfterQuestion = {};
-    IQLY.CONFIG.tracking.variantId = 'variant-2-no-midquiz-feedback';
+    // TEST 2 — funnel step: quiz start -> completion.
+    // Hypothesis: a shorter quiz lowers the time-commitment and mid-quiz
+    // abandonment risk, at the possible cost of a "thinner"-feeling result
+    // (fewer data points behind the category breakdown). Question selection
+    // is handled by scoring.js's selectQuestions() helper, which draws
+    // proportionally across categories rather than hardcoding "first N" —
+    // so this override never silently drops a category from the result
+    // (docs/part2-spec.md, Test 2).
+    IQLY.CONFIG.flow.questionCount = 5;
+    IQLY.CONFIG.tracking.variantId = 'variant-2-shorter-quiz';
   </script>
 
   <script src="src/main.js"></script>

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-  <title>IQly — Variant 3: Full Reveal Before Gate</title>
+  <title>IQly — Variant 3: Percentile Framing</title>
   <link rel="icon" href="data:," />
 
   <link rel="stylesheet" href="styles/tokens.css" />
@@ -23,14 +23,14 @@
   <script src="src/debug.js"></script>
 
   <script>
-    // TEST 3 — funnel step: result screen -> account creation.
-    // Hypothesis (placeholder, to be finalized in Part 2 write-up): showing
-    // the full score/percentile before the gate (vs. the partial-reveal
-    // curiosity-gap baseline) may convert better for users who dislike a
-    // paywall-feeling ask before seeing what they "earned".
-    IQLY.CONFIG.result.revealMode = 'full';
-    IQLY.CONFIG.emailGate.position = 'afterResult';
-    IQLY.CONFIG.tracking.variantId = 'variant-3-full-reveal-before-gate';
+    // TEST 3 — funnel step: result shown -> account creation.
+    // Hypothesis: leading the partial-result headline with competitive
+    // standing ("higher than X% of test-takers") converts better than the
+    // baseline's personal-insight framing ("Your Standout Strength") for a
+    // "free iq test" search audience — social comparison vs.
+    // self-understanding (docs/part2-spec.md, Test 3).
+    IQLY.CONFIG.result.leadWith = 'percentileRank';
+    IQLY.CONFIG.tracking.variantId = 'variant-3-percentile-framing';
   </script>
 
   <script src="src/main.js"></script>

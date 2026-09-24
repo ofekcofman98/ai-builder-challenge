@@ -94,11 +94,14 @@ this defensible here because of near-perfect message match: the user
 searched "free iq test" and receives exactly that, with no
 intermediate offer.
 
-**Bottleneck ranking (impact of a +10 percentage-point improvement on
-overall CVR):**
-- Result → Account:      +4.3pp  ← highest leverage
+//? percentages here are necessary? or just numbers?
+
+**Bottleneck ranking (impact of a +10pp improvement on overall CVR):**
+- Result → Account:      +4.3pp  ← highest leverage 
 - Quiz start → Complete: +2.8pp
 - Visit → Quiz start:    +2.5pp
+
+//? what is pp ?
 
 This ranking is what drives both the design of Part 1 (trust element
 and partial-reveal mechanic placed immediately before the signup CTA)
@@ -112,7 +115,7 @@ presentation one.
 
 ---
 
-## IQly Quiz Flow — Screen Sequence (Part 1, as built)
+## IQly Quiz Flow — Screen Sequence (Part 1)
 
 ### 1. Entry Screen
 - Headline: value proposition ("Discover your IQ score")
@@ -122,30 +125,15 @@ presentation one.
   (no fabricated social proof — product has no user history yet)
 - Q0 (soft-entry demographic question) visible immediately below,
   acting as the de facto CTA — no separate "Start Quiz" button
-- Progress bar starts at 0% on load — it does not pre-fill before
-  any user action. It only jumps forward once Q1 is answered.
-  Reasoning changed from the original "endowed progress" plan: a
-  bar that's already partially full before the user has done
-  anything reads as a fake/decorative element rather than a
-  reflection of real progress, undermining the trust framing the
-  entry screen is otherwise built around.
+- Progress bar initialized at ~15% (endowed progress effect)
 
 ### 2. Quiz — Q1 to Q8
 - One question per screen (pattern, logic, spatial, memory,
   sequence types)
 - Progress bar fills incrementally with each answer
-- The answer-options area renders inside a fixed-height container,
-  sized to the longest answer set across all questions, so moving
-  from a short-answer question to a long-answer one causes no
-  layout shift or scroll jump — mid-quiz layout jumps are a
-  concrete source of rage-clicks/mis-taps on mobile
 - Non-blocking toast feedback after Q3 and Q6 (e.g. "Faster than
-  78% of test-takers") renders into a fixed, reserved slot in the
-  layout (space is always allocated, whether or not a toast is
-  showing) rather than absolutely-positioned overlay — this was
-  changed after the first pass overlapped the toast with question
-  content on short viewports; the reserved slot guarantees it never
-  can, on any screen size
+  78% of test-takers") — slides in above the question, auto-dismiss,
+  never overlays answer options
 - Small streak indicator in corner for continued engagement
 
 ### 3. Loading / Labor Illusion
@@ -154,36 +142,23 @@ presentation one.
 - Purpose: perceived-effort cue: raises perceived value of the
   result that follows
 
-### 4. Partial Result Screen (with inline email gate)
+### 4. Partial Result Screen
 - Personal framing, not just a category list: lead with
   "Your Standout Strength: [Pattern Recognition]" as the dominant
   element, secondary categories shown smaller below
-- Overall standing is shown as a visual percentile curve (SVG bell
-  curve with the user's position marked) instead of plain text —
-  no exact number or percentile is stated. This replaced an earlier
-  "locked score" placeholder; the curve communicates "you're here,
-  relative to others" at a glance without needing a number to do it,
-  and keeps the reveal purely visual/curiosity-driven
 - Small trust badge positioned directly above the CTA (methodology
   reference, not fabricated numbers)
-- The email field is inline at the bottom of this same screen, not
-  a separate "See your full score" screen reached by an extra click.
-  Result → Account is the steepest modeled drop-off in this funnel
-  (see Bottleneck ranking above), so an unearned extra click on it
-  directly worked against the flow's own stated priority. Submitting
-  the email advances straight to the full result; `result_viewed`
-  and `account_created` still fire as distinct tracked events at the
-  same points, so step-level measurement isn't lost by removing the
-  screen boundary.
+- No numeric score or percentile shown yet
+- CTA: "See your full score and percentile"
 
-### 5. Full Result Screen
+### 5. Email Gate
+- Single field: email only (no password/multi-field form)
+- Zero monetary cues anywhere on this screen
+- Framed as unlocking value already earned, not a paywall
+
+### 6. Full Result Screen
 - Exact IQ score + percentile rank
-- Category breakdown shown as qualitative tiers (Strong / Average /
-  Needs practice) rather than raw percentages. With only 1-2
-  questions feeding each category, a number like "67%" implies a
-  precision the underlying sample size doesn't support — that's
-  false precision, not information. Tiers say the same useful thing
-  (where you're relatively stronger/weaker) without the fake decimal
+- Full category breakdown
 - Optional: minimalist archetype label (e.g. "The Pattern Seeker"),
   text + icon only — no illustrated mascots, to preserve the
   test's credibility
@@ -191,18 +166,6 @@ presentation one.
   card. Positioned post-conversion only, as a low-cost acquisition
   loop (K-factor) — out of the core CVR scope but noted in the
   write-up as an additional growth lever
-
-### 6. Post-signup "Unlock more" upsell teaser (not part of measured funnel)
-- Shown immediately after account creation, so it never sits in the
-  path being optimized for CVR
-- Demonstrates two monetization directions considered but not built:
-  historical progress tracking and an AI-powered "IQ Coach" — teaser
-  UI only, no payment processing
-- Rendered as a real button (not a text link), since a screen whose
-  entire purpose is to be clicked should look clickable
-- Click-through on each option is tracked, since which direction
-  users gravitate toward is itself a useful signal for a future
-  iteration
 
 ---
 
@@ -214,7 +177,7 @@ presentation one.
   example filename convention (`variant-1-signup-after-q3.html`).
 
 
-## Deferred Scope — Noted, Not Implemented
+  ## Deferred Scope — Noted, Not Implemented
 
 Several ideas were considered and deliberately excluded from this
 flow because they don't move the measured KPI (account creation
@@ -241,9 +204,17 @@ thinking behind the design:
   organic competitor research), and (2) a subscription "IQ Coach"
   agent offering ongoing, personalized cognitive training —
   consistent with the broader shift toward AI-native, agentic
-  product experiences. Neither was fully implemented (a teaser-only
-  UI for both exists post-signup, see screen 6 above), since
-  introducing any monetary element before account creation would
-  work against the flow's actual goal, but the agent-based direction
-  in particular reflects where this kind of product likely evolves
+  product experiences. Neither was implemented, since introducing
+  any monetary element before account creation would work against
+  the flow's actual goal, but the agent-based direction in
+  particular reflects where this kind of product likely evolves
   next.
+
+  A lightweight post-signup upsell screen was added (not part of the
+  measured funnel, since it appears only after account creation) to
+  demonstrate the two monetization directions considered: historical
+  progress tracking and an AI-powered "IQ Coach." Both are shown as
+  teaser UI only — no payment processing was built, as this is
+  explicitly out of the CVR scope for this challenge. Click-through on
+  each option is tracked, since which direction users gravitate toward
+  is itself a useful signal for a future iteration.

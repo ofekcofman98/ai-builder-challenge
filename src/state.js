@@ -36,6 +36,18 @@ IQLY.state = (function () {
     return IQLY.CONFIG.flow.questionCount;
   }
 
+  // Memoized: same subset must stay stable across a run (state.js decides
+  // *which* questions were asked; scoring.js independently re-derives the
+  // identical subset from the same deterministic selectQuestions() call for
+  // category totals — see scoring.js).
+  var activeQuestions = null;
+  function getActiveQuestions() {
+    if (!activeQuestions) {
+      activeQuestions = IQLY.selectQuestions(questionCount());
+    }
+    return activeQuestions;
+  }
+
   function questionsRemain() {
     return current.answers.length < questionCount();
   }
@@ -114,7 +126,7 @@ IQLY.state = (function () {
   }
 
   function getCurrentQuestion() {
-    return IQLY.QUESTIONS[current.answers.length];
+    return getActiveQuestions()[current.answers.length];
   }
 
   function recordSoftEntry(value) {
@@ -183,6 +195,7 @@ IQLY.state = (function () {
       softEntryAnswer: null,
       emailCaptured: false,
     };
+    activeQuestions = null;
   }
 
   return {

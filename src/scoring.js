@@ -7,6 +7,44 @@
 
 var IQLY = window.IQLY || {};
 
+// Draws `count` questions from IQLY.QUESTIONS proportionally across
+// categories (round-robin in each category's first-appearance order),
+// rather than a naive "first N" slice. Keeps CONFIG.flow.questionCount as
+// the single source of truth for quiz length (Part 2 Test 2) without ever
+// silently dropping a category from the result breakdown, and without
+// requiring questions.js or state.js/scoring.js's category logic to change
+// when the question bank grows.
+IQLY.selectQuestions = function (count) {
+  var questions = IQLY.QUESTIONS;
+  if (count >= questions.length) return questions.slice();
+
+  var byCategory = {};
+  var categoryOrder = [];
+  questions.forEach(function (q) {
+    if (!byCategory[q.category]) {
+      byCategory[q.category] = [];
+      categoryOrder.push(q.category);
+    }
+    byCategory[q.category].push(q);
+  });
+
+  var selected = [];
+  var round = 0;
+  while (selected.length < count) {
+    var addedThisRound = false;
+    for (var i = 0; i < categoryOrder.length && selected.length < count; i++) {
+      var q = byCategory[categoryOrder[i]][round];
+      if (q) {
+        selected.push(q);
+        addedThisRound = true;
+      }
+    }
+    if (!addedThisRound) break; // bank exhausted before reaching count
+    round++;
+  }
+  return selected;
+};
+
 IQLY.scoring = {
   /**
    * @param {Array} answers - selected option indexes, in question order
@@ -15,7 +53,7 @@ IQLY.scoring = {
    */
   computeResult: function (answers) {
     answers = answers || [];
-    var questions = IQLY.QUESTIONS;
+    var questions = IQLY.selectQuestions(IQLY.CONFIG.flow.questionCount);
     var byCategory = {}; // category -> {correct, total}
 
     questions.forEach(function (q, i) {
