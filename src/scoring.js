@@ -49,18 +49,24 @@ IQLY.scoring = {
   /**
    * @param {Array} answers - selected option indexes, in question order
    * @returns {{score:number, percentile:number, categories:Object,
-   *            standout:string, archetype:Object}}
+   *            categoryDetails:Object (each {correct, total, items:
+   *            [{prompt, isCorrect}]}), standout:string, archetype:Object}}
    */
   computeResult: function (answers) {
     answers = answers || [];
     var questions = IQLY.selectQuestions(IQLY.CONFIG.flow.questionCount);
-    var byCategory = {}; // category -> {correct, total}
+    var byCategory = {}; // category -> {correct, total, items}
 
     questions.forEach(function (q, i) {
       var cat = q.category;
-      if (!byCategory[cat]) byCategory[cat] = { correct: 0, total: 0 };
+      if (!byCategory[cat]) byCategory[cat] = { correct: 0, total: 0, items: [] };
+      var isCorrect = answers[i] === q.correctIndex;
       byCategory[cat].total++;
-      if (answers[i] === q.correctIndex) byCategory[cat].correct++;
+      if (isCorrect) byCategory[cat].correct++;
+      // Per-question right/wrong rows, for the locked category-report
+      // panel's blurred teaser (docs/fixes.md item 4 follow-up) — real
+      // question prompts + real correctness, never fabricated rows.
+      byCategory[cat].items.push({ prompt: q.prompt, isCorrect: isCorrect });
     });
 
     var correctCount = 0;
@@ -69,9 +75,15 @@ IQLY.scoring = {
     });
 
     var categories = {};
+    // Raw right/wrong counts per category, alongside the rounded
+    // percentages above — the locked category-breakdown teaser on
+    // partialResult (docs/fixes.md item 4) blurs this real data rather
+    // than fabricated placeholder text.
+    var categoryDetails = {};
     for (var cat in byCategory) {
       var c = byCategory[cat];
       categories[cat] = c.total ? Math.round((c.correct / c.total) * 100) : 0;
+      categoryDetails[cat] = { correct: c.correct, total: c.total, items: c.items };
     }
 
     // Deliberately bounded to a flattering-but-plausible range (90–135):
@@ -91,6 +103,7 @@ IQLY.scoring = {
       score: score,
       percentile: percentile,
       categories: categories,
+      categoryDetails: categoryDetails,
       standout: standout,
       archetype: archetype,
     };

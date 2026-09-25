@@ -533,6 +533,184 @@
   white-space: nowrap;
 }
 
+/* Locked category report — fullResult only, post-signup teaser for the
+   real per-category right/wrong counts (docs/fixes.md item 4). The pill
+   row is a single line, never wrapping — a second/third line would mean
+   an opened panel elsewhere pushes later pills around, which is exactly
+   the layout-jump bug this structure avoids. Exactly one
+   .category-report-panel exists, positioned once below the row —
+   render.js swaps its content, it never moves or duplicates. */
+.category-report {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.category-report-label {
+  font-size: var(--font-size-sm);
+}
+
+.category-report-pill-row {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: var(--space-1);
+  overflow-x: auto;
+  padding-bottom: var(--space-1); /* room for a focus/scroll ring, not clipped by the mask */
+  -webkit-mask-image: linear-gradient(to right, black calc(100% - 24px), transparent 100%);
+  mask-image: linear-gradient(to right, black calc(100% - 24px), transparent 100%);
+  /* All 5 pills fit on one line without scrolling once the content column
+     has ~394px+ available (real viewport >=~426px, and always on desktop
+     since #app caps at 480px regardless of window size — see the pill
+     sizing comment below). 375px/360px still overflow by a few px even
+     at this size and fall back to this scroll, with the browser's own
+     scrollbar hidden so it doesn't read as leftover chrome (the fade mask
+     above is the only visible scroll affordance). */
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* legacy Edge/IE */
+}
+
+.category-report-pill-row::-webkit-scrollbar {
+  display: none; /* WebKit/Chromium */
+}
+
+/* Sizing is tightened unconditionally, not behind a viewport media query:
+   #app is capped at --content-max-width (480px, tokens.css) regardless of
+   window size, so the pill row's available width never exceeds ~448px
+   even on desktop — a `max-width` breakpoint gated on window width alone
+   left this oversized at desktop widths where the rendered column is
+   still narrow (confirmed by measuring rowScrollWidth vs the real
+   available width in-browser: the wider padding/font overflowed the
+   448px column at any window width once tested past what a media query
+   alone would catch). Measured result at these sizes: all 5 pills
+   (Pattern/Logic/Spatial/Memory/Sequence) fit on one line without
+   scrolling from ~394px of available content width upward — i.e.
+   >=426px real viewport width, and always on desktop since the column
+   caps out at 448px. Below that (390px and narrower, incl. 375px) the
+   row still overflows by a few px even at this size and falls back to
+   the horizontal scroll above; shrinking the font further to force a fit
+   at 375px was rejected — 12px is already close to the practical
+   legibility floor for a tap-target label. */
+.category-report-pill {
+  flex: 0 0 auto;
+  cursor: pointer;
+  min-height: var(--tap-target-min); /* unaffected by the tighter padding below */
+  padding: var(--space-2) var(--space-3);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-bg);
+  border: 1.5px solid var(--color-primary);
+  border-radius: var(--radius-pill);
+  color: var(--color-primary);
+  font-size: 0.75rem;
+  font-weight: var(--font-weight-medium);
+  font-family: inherit;
+  text-transform: capitalize;
+  white-space: nowrap;
+  transition: background var(--duration-fast) ease, color var(--duration-fast) ease;
+}
+
+.category-report-pill.is-active {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: var(--color-primary-contrast);
+}
+
+/* Open/close animation: 0fr -> 1fr on the wrapper (handles the panel's
+   variable content height reliably, unlike animating max-height against a
+   guessed pixel value), opacity fades alongside. The inner
+   .category-report-panel needs overflow:hidden + min-height:0 for the 0fr
+   state to actually collapse instead of forcing the row to content size.
+   Swapping which category is selected while already open only replaces
+   .category-report-panel's innerHTML — the wrap stays at 1fr throughout,
+   so switching categories never flashes closed-then-open. */
+.category-report-panel-wrap {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 280ms ease;
+}
+
+.category-report-panel-wrap.is-open {
+  grid-template-rows: 1fr;
+}
+
+.category-report-panel {
+  overflow: hidden;
+  min-height: 0;
+  opacity: 0;
+  transition: opacity 280ms ease;
+}
+
+.category-report-panel-wrap.is-open > .category-report-panel {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .category-report-panel-wrap,
+  .category-report-panel {
+    transition: none;
+  }
+}
+
+.category-report-locked {
+  position: relative;
+  min-height: var(--tap-target-min);
+  width: 100%;
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  cursor: pointer;
+  overflow: hidden;
+}
+
+/* The real per-question rows (screens.js's categoryReportPanelHtml) sit
+   here, blurred as a group — strong enough that prompt text is genuinely
+   illegible while the correct/incorrect icon colors still read as a
+   color cue, not just barely-readable text with a light haze. */
+.category-report-blurred {
+  filter: blur(6px);
+  user-select: none;
+  padding: var(--space-3);
+}
+
+.category-report-qrow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-1) 0;
+}
+
+.qrow-icon {
+  flex-shrink: 0;
+}
+
+.qrow-label {
+  font-size: var(--font-size-sm);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Layered on top of .category-report-blurred, not inside it — this stays
+   crisp and clickable regardless of the blur filter applied to the layer
+   beneath it. */
+.category-report-lock {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text);
+  background: rgba(255, 255, 255, 0.7);
+}
+
+.lock-icon {
+  flex-shrink: 0;
+}
+
 /* Full result */
 .score-card {
   text-align: center;

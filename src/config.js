@@ -141,6 +141,14 @@ IQLY.CONFIG = {
       // stays consistent with the "no pressure" framing on the upsell
       // screen itself.
       unlockMoreCta: 'See how you improve over time →',
+      // Locked category report (docs/fixes.md item 4): sits post-signup on
+      // this screen specifically — unlike the pre-conversion blur/lock
+      // rejected for the score itself (write-up-part1.md's decision log),
+      // this gates a genuinely deeper tier of detail (exact right/wrong
+      // counts) behind a real premium feature, on a screen the user only
+      // reaches after converting. See AI_WORKFLOW.md.
+      categoryReportToggle: 'See your exact right/wrong breakdown',
+      categoryReportUnlockLabel: 'Unlock full breakdown',
     },
     // Wording for scoring.js's categoryLabel() tiers — replaces a raw
     // percentage, which is falsely precise given ~1-2 questions/category.
@@ -165,7 +173,11 @@ IQLY.CONFIG = {
       plans: {
         progress: {
           title: 'Track Your Progress',
-          description: 'Retake the test over time and see your IQ trend.',
+          // Names the category breakdown explicitly (docs/fixes.md item 4's
+          // pricing tie-in note) — it's what the locked teaser on
+          // partialResult already showed a glimpse of, so this plan is
+          // naming a benefit the user has already seen, not a new pitch.
+          description: 'Retake the test over time, see your IQ trend, and unlock your full category-by-category breakdown.',
           price: '$9/mo',
           cta: 'Get started',
         },

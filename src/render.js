@@ -24,6 +24,12 @@ var IQLY = window.IQLY || {};
   // fresh node can be snapped back to it and animated forward on each mount.
   var lastProgressPercent = 0;
 
+  // Which category-report pill (if any) is expanded on fullResult —
+  // ephemeral UI state, not part of the quiz funnel, so it lives here
+  // rather than in state.js. Reset on every mount so leaving/re-entering
+  // fullResult always starts collapsed.
+  var selectedCategoryId = null;
+
   var toastTimer = null;
   // The mid-quiz percentile toast (see handleAnswer) fires just before
   // advancing to the NEXT question, so its message is queued here and
@@ -189,6 +195,39 @@ var IQLY = window.IQLY || {};
     mount();
   }
 
+  // Toggles the single shared category-report panel: re-clicking the
+  // already-open pill collapses it, clicking a different pill swaps the
+  // panel's content directly (never two panels, never closes-then-opens).
+  // Only the panel-wrap's `is-open` class, the panel's innerHTML, and the
+  // pills' active class change — the pill row's own layout is untouched
+  // either way. The wrap stays at its open grid-template-rows across a
+  // category swap (is-open is only ever added/removed on a null<->id
+  // transition), so switching categories never re-triggers the
+  // open/close animation, just swaps content while already open.
+  function handleSelectCategory(categoryId) {
+    var wasOpen = !!selectedCategoryId;
+    selectedCategoryId = selectedCategoryId === categoryId ? null : categoryId;
+    renderCategoryPanel(wasOpen);
+  }
+
+  function renderCategoryPanel(wasOpen) {
+    var wrap = document.querySelector('[data-role="category-report-panel-wrap"]');
+    var panel = document.querySelector('[data-role="category-report-panel"]');
+    if (!wrap || !panel) return;
+
+    document.querySelectorAll('.category-report-pill').forEach(function (pill) {
+      pill.classList.toggle('is-active', pill.getAttribute('data-value') === selectedCategoryId);
+    });
+
+    if (!selectedCategoryId) {
+      wrap.classList.remove('is-open');
+      return;
+    }
+
+    panel.innerHTML = IQLY.categoryReportPanelHtml(selectedCategoryId);
+    if (!wasOpen) wrap.classList.add('is-open');
+  }
+
   function handleSelectPlan(planId) {
     // Genuinely useful signal even as a teaser — which tier users show
     // interest in, without building any real payment flow behind it.
@@ -222,6 +261,7 @@ var IQLY = window.IQLY || {};
     else if (action === 'view-upsell') handleViewUpsell();
     else if (action === 'select-plan') handleSelectPlan(value);
     else if (action === 'dismiss-upsell') handleDismissUpsell();
+    else if (action === 'select-category') handleSelectCategory(value);
   }
 
   function onAppSubmit(event) {
@@ -263,6 +303,7 @@ var IQLY = window.IQLY || {};
       return;
     }
 
+    selectedCategoryId = null;
     appEl.innerHTML = renderFn();
     trackScreenView(screenName);
     syncPersistence(screenName);

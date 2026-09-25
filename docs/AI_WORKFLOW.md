@@ -20,6 +20,75 @@ Entry format:
 
 ---
 
+## 2026-09-25 — Final polish pass (`docs/fixes.md`): progress-bar animation bug, refresh persistence, post-email pacing, locked category report
+
+**Decision:** implemented all 4 items from `docs/fixes.md`, one at a time with a stop for
+review after each:
+
+1. **Progress bar transition** — `docs/fixes.md` asked to *verify* the existing CSS
+   transition, on the assumption an earlier pass had added it but it "apparently didn't
+   land." The CSS rule was genuinely present, but the actual bug was elsewhere: `mount()`
+   replaces `#app.innerHTML` wholesale on every screen change, so `.progress-fill` is a
+   brand-new DOM node each mount, painted directly at its target width with no "before"
+   state to transition from — the CSS was correct but inert. Fixed in `render.js` with a
+   snap-back-then-defer approach: on mount, the fresh node is set back to the
+   last-rendered percent, then the real target width is written two `requestAnimationFrame`
+   callbacks later, giving the browser an actual committed paint to animate from.
+2. **Refresh persistence** — new `src/persistence.js` (save/load/clear, reusing
+   `tracking.js`'s try/catch localStorage convention under a separate key), `state.js`
+   gained `getSnapshot()`/`restoreSnapshot()` (fails safe on anything malformed, rejects
+   `emailCaptured: true` or a terminal screen), `render.js`'s `mount()` saves/clears on
+   every screen, `main.js` restores before the first mount unless a deep-link param is
+   present (a fresh ad click intentionally overrides stale saved progress).
+3. **Post-email transitional state** — a `processingResult` screen (spinner +
+   "Calculating your results...", `CONFIG.processingResult.durationMs`), rendered directly
+   by `render.js`'s `handleEmailSubmit()` and deferring `state.advance()`/`mount()` by a
+   `setTimeout`, mirroring the existing `runAnalyzingSequence()` pattern. Deliberately not
+   a `state.js` screen — email submission doesn't change the resolver's notion of "current
+   screen," so it's never persisted or reached via a fresh mount.
+4. **Locked category report** — placed on `fullResult`, not `partialResult`. See below.
+
+**Considered (item 4 placement):** `docs/fixes.md`'s own text was internally
+inconsistent — its "Fix" bullet said "partial-result screen," but every other mention in
+the same doc ("after email submission," "post-conversion," "sits outside the CVR measured
+by Part 2's tests," "entirely post-signup") points at the screen reached *after* email
+capture, which in this codebase is `fullResult` (the baseline gate is inline on
+`partialResult`, submitted *before* the reveal it gates). Went with `fullResult`, treating
+"partial-result screen" as a stale reference to a pre-refactor layout rather than the
+literal instruction — confirmed by the earlier "Inline email capture on partialResult"
+decision below, which predates `docs/fixes.md` and already moved the gate off a standalone
+screen. This placement also resolves a data-shape question: `fullResult` already shows a
+free, qualitative per-category tier (Strong/Average/Needs practice); the new locked
+section teases the *exact* right/wrong counts instead — a genuinely deeper tier, not a
+blurred duplicate of what's already free on the same screen.
+
+**Why the pre-conversion blur/lock rejection does NOT apply here:** `write-up-part1.md`
+(lines 85–92) documents rejecting a blurred/locked *exact score* on the pre-conversion
+partial-result screen as a dark pattern — "a fake-looking blur reads as manipulative, not
+curious," replaced with the honest percentile-curve visualization (also in
+`write-up.md:161–166`). This new locked section is a different case on three counts: (a)
+it sits on `fullResult`, reached only *after* the user has already converted (the account
+exists), not before; (b) the free tier on the same screen already gives an honest,
+non-obscured qualitative answer (Strong/Average/Needs practice) — nothing that should be
+free is hidden; (c) the blurred content is the real computed right/wrong count, not a
+placeholder standing in for data that doesn't exist yet, matching `docs/fixes.md`'s
+explicit instruction not to fabricate blurred text. It's a genuine paid-feature teaser on
+a monetization/retention screen, not a curiosity-gap tactic on the conversion path itself
+— out of scope for the CVR metric Part 2's tests measure.
+
+**AI's role:** the user asked to implement `docs/fixes.md` one item at a time. Claude
+diagnosed the actual root cause of item 1 (a DOM-recreation issue, not a missing CSS rule)
+via real browser measurement (`getBoundingClientRect` sampled across animation frames,
+not just reading the CSS) after an initial naive fix (`offsetWidth` reflow) turned out
+insufficient and needed a second, verified attempt. For item 4, Claude caught the
+placement inconsistency in `docs/fixes.md` itself, resolved it against the codebase's
+actual architecture and an earlier logged decision, and implemented+verified the result
+end-to-end in a real browser (confirmed the blurred text matches `scoring.js`'s real
+`categoryDetails`, not placeholder copy, and that the locked click-through lands on the
+pricing/upsell screen) before reporting each item done.
+
+---
+
 ## 2026-09-25 — Guardrail dashboard (`dashboard.html`), simulated data only
 
 **Decision:** built a standalone `dashboard.html` per `docs/dashboard.md`'s spec — flat

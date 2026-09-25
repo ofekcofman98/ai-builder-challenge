@@ -137,6 +137,107 @@ function percentileCurve(percentile, markerLabel) {
   );
 }
 
+function lockIcon() {
+  return (
+    '<svg class="lock-icon" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">' +
+      '<rect x="5" y="11" width="14" height="9" rx="2" fill="none" stroke="currentColor" stroke-width="2"/>' +
+      '<path d="M8 11V7a4 4 0 0 1 8 0v4" fill="none" stroke="currentColor" stroke-width="2"/>' +
+    '</svg>'
+  );
+}
+
+// Locked category-report teaser (docs/fixes.md item 4) — fullResult only,
+// post-signup. Blurs the REAL per-category right/wrong counts already
+// computed by scoring.js's computeResult() (categoryDetails), not
+// placeholder text: a real number blurred reads as a genuine premium
+// teaser, a fake one reads as fabricated the moment anyone inspects it.
+//
+// The pill row and its detail panel are two separate elements, not one
+// pill's content inline-injected next to itself: an *inline* per-pill
+// panel (the first version of this) pushes every later pill onto a new
+// line the moment one opens, and relocates the panel's DOM position
+// every time a different pill is picked — both read as the layout
+// jumping around. Instead there is exactly one panel, rendered once,
+// directly below the (always single-row) pill row; render.js owns which
+// category is selected (ephemeral UI state, not part of the quiz funnel,
+// so it doesn't belong in state.js) and swaps only the panel's content —
+// see render.js's selectedCategoryId/renderCategoryPanel().
+function categoryReportPills(result, copy) {
+  var pills = Object.keys(result.categoryDetails).map(function (cat) {
+    return '<button class="category-report-pill" type="button" data-action="select-category" data-value="' +
+      cat + '">' + escapeHtml(cat) + '</button>';
+  }).join('');
+
+  return (
+    '<div class="category-report">' +
+      '<span class="category-report-label text-muted">' + escapeHtml(copy.categoryReportToggle) + '</span>' +
+      '<div class="category-report-pill-row">' + pills + '</div>' +
+      '<div class="category-report-panel-wrap" data-role="category-report-panel-wrap">' +
+        '<div class="category-report-panel" data-role="category-report-panel"></div>' +
+      '</div>' +
+    '</div>'
+  );
+}
+
+// Solid-filled (not a pale tint + thin stroke) so the color survives the
+// panel's blur(6px) as a visible color blob — a light background tint
+// behind a 2px stroke averages out to almost nothing once blurred, which
+// is what made these too faint to read at a glance.
+function checkIcon() {
+  return (
+    '<svg class="qrow-icon qrow-icon-correct" viewBox="0 0 20 20" width="20" height="20" aria-hidden="true">' +
+      '<circle cx="10" cy="10" r="10" fill="var(--color-success)"/>' +
+      '<path d="M5.5 10.5l2.8 2.8 6.2-6.8" fill="none" stroke="var(--color-success-bg)" stroke-width="2.5" ' +
+        'stroke-linecap="round" stroke-linejoin="round"/>' +
+    '</svg>'
+  );
+}
+
+function crossIcon() {
+  return (
+    '<svg class="qrow-icon qrow-icon-incorrect" viewBox="0 0 20 20" width="20" height="20" aria-hidden="true">' +
+      '<circle cx="10" cy="10" r="10" fill="var(--color-danger)"/>' +
+      '<path d="M6.5 6.5l7 7M13.5 6.5l-7 7" fill="none" stroke="var(--color-danger-bg)" stroke-width="2.5" ' +
+        'stroke-linecap="round"/>' +
+    '</svg>'
+  );
+}
+
+// Pure function of (categoryId, state, CONFIG) -> the panel's inner HTML —
+// called directly by render.js's renderCategoryPanel() to fill the single
+// shared panel slot above, not part of a full screen mount. Renders the
+// REAL per-question right/wrong rows (scoring.js's categoryDetails[cat]
+// .items — actual prompts, actual correctness), not placeholder text, so
+// the blur genuinely reads as "real content, obscured" rather than a
+// fabricated teaser. The blurred rows and the lock/CTA overlay are two
+// separate layers (.category-report-blurred underneath,
+// .category-report-lock positioned on top) so the CSS blur filter never
+// touches the overlay itself — it stays crisp and clickable.
+IQLY.categoryReportPanelHtml = function (categoryId) {
+  var copy = IQLY.CONFIG.copy.fullResult;
+  var result = IQLY.state.getResult();
+  var detail = result.categoryDetails[categoryId];
+  if (!detail) return '';
+
+  var rows = detail.items.map(function (item) {
+    return (
+      '<div class="category-report-qrow">' +
+        (item.isCorrect ? checkIcon() : crossIcon()) +
+        '<span class="qrow-label">' + escapeHtml(item.prompt) + '</span>' +
+      '</div>'
+    );
+  }).join('');
+
+  return (
+    '<div class="category-report-locked" data-action="view-upsell">' +
+      '<div class="category-report-blurred">' + rows + '</div>' +
+      '<span class="category-report-lock">' + lockIcon() + ' ' +
+        escapeHtml(copy.categoryReportUnlockLabel) +
+      '</span>' +
+    '</div>'
+  );
+};
+
 // Shared by the emailGate screen (mid-quiz / full-reveal-before-result
 // paths) and the inline field on partialResult (baseline path) — same
 // markup, same data-role hooks, so render.js's handleEmailSubmit() works
@@ -395,6 +496,7 @@ IQLY.screens = {
           '</div>' +
         '</div>' +
         '<div class="category-list">' + categoryRows + '</div>' +
+        categoryReportPills(result, copy) +
         '<button class="btn btn-secondary" type="button" data-action="share">' +
           escapeHtml(copy.shareCta) +
         '</button>' +
