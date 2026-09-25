@@ -20,6 +20,135 @@ Entry format:
 
 ---
 
+## 2026-09-25 — Guardrail dashboard (`dashboard.html`), simulated data only
+
+**Decision:** built a standalone `dashboard.html` per `docs/dashboard.md`'s spec — flat
+file at repo root, no `src/*.js` (static markup only, no state machine needed), reusing
+`styles/tokens.css`/`base.css`/`components.css` via the same link pattern as `index.html`.
+Its own `.dashboard` container bypasses base.css's `#app` phone-width cap (this is a report
+page, not a funnel screen) rather than reworking `#app` itself. Added `--color-danger`/
+`--color-warning` token pairs to `tokens.css` (reusing `--color-success` for the Ship tag)
+and a set of dashboard-scoped classes to `components.css`. All KPI numbers are transcribed
+verbatim from the spec's fixed data table — no recalculation. Verified via a locally
+installed (then removed) `puppeteer` at 375px and 1280px: no overflow/overlap at either
+width, verdict tags color-coded and legible.
+
+**Considered:** a "Live" mode reading real `tracking.js` events — rejected/deferred per
+the spec itself, since no real traffic exists yet to make it meaningful. A single combined
+funnel chart for all 3 variants — rejected as visually crowded; per-test rows read faster.
+
+**Why:** Tests 1 and 2 both look like wins on their primary KPI alone; the entire point of
+the dashboard is showing the guardrail (and, for Test 2, the net-funnel multiplication)
+catching what the primary metric misses. That "primary looked good but guardrail said no"
+point is stated explicitly in-page (a `.guardrail-callout` block on each of those two
+cards), not left implicit, per the spec's explicit requirement.
+
+**AI's role:** Claude read the spec, chose the CSS-token/component split (additive to
+existing files, no new ad-hoc colors), wrote the page, and ran the Puppeteer verification
+pass end-to-end; the user confirmed the approach and asked for the Puppeteer check to be
+run via `npx` when local puppeteer wasn't already available.
+
+---
+
+## 2026-09-25 — Dashboard charts: inline SVG, no library (follow-up to the guardrail dashboard)
+
+**Decision:** added two hand-built inline-SVG charts to `dashboard.html` as a JS-generation
+pass, following `screens.js`'s existing `percentileCurve()`/`logoMark()` pattern (a
+function returning an SVG string, colors via `var(--token)`) rather than a new approach —
+a net-CVR bar chart (Control/Test 2/Test 3; Test 1 omitted since its primary KPI isn't a
+comparable full-funnel number, with a caption explaining why) above the funnel comparison,
+and a compact before/after bar pair inline in each KPI row, scaled against a per-row `max`
+(100 for percentages, 20 for Test 3's time-on-screen guardrail so seconds aren't treated as
+0–100). Bar colors: verdict-colored for the summary chart (danger/success, not the brand
+primary — reserved for the quiz product), and success/danger per KPI row based on whether
+that specific metric moved in a good or bad direction. Hit one bug during verification:
+`height="auto"` is invalid as an SVG attribute (unlike CSS) and threw a console error in
+Puppeteer — fixed by moving sizing to a CSS class (`width:100%; height:auto`) instead of
+inline SVG attributes.
+
+**Considered:** including a 4th "not comparable" bar for Test 1 — rejected per the task's
+own instruction not to fabricate a full-funnel number that isn't in the spec; omission +
+caption was cleaner than a fake/greyed bar.
+
+**AI's role:** Claude checked `screens.js`'s existing SVG helpers first (confirmed the
+pattern extends cleanly, no data-shape coupling issue), wrote both chart functions and the
+inline markup/CSS, caught and fixed the `height="auto"` SVG bug via the Puppeteer console
+capture, and re-verified visually via screenshots at 375px/1280px before reporting done.
+
+---
+
+## 2026-09-25 — Branding pass: navy accent + Space Grotesk/Geist Sans; closes Tier 2/3 polish
+
+**Decision:** merged a proposed `tokens.css` (navy `#1C61C9` accent, warm neutrals,
+Space Grotesk headings / Geist Sans body, tighter radii) into the real `styles/tokens.css`
+rather than replacing it outright — kept every existing token the proposal didn't cover
+(`--color-progress-track/fill`, `--color-toast-bg/text`, `--radius-pill`, `--shadow-card`,
+motion/spacing scales), re-pointing the toast/progress tokens at the new success/border
+colors instead of dropping them. `--font-weight-medium` moved 600→500 to match Geist's
+actual medium weight. Applied `var(--font-heading)` globally via `h1,h2,h3` in `base.css`
+(covers every screen — no per-screen class changes needed) and to the analogous headline
+elements in all 3 `creatives/*.html` files. Closed the two remaining polish items that
+were blocked on this branding decision: the feedback toast now uses
+`var(--color-success)`/`var(--color-success-bg)` (was black) with a fade+slide-in
+matching the existing `.toast-slot-text` convention; the progress bar's `width` transition
+(`components.css`) was already in place from an earlier pass and needed no change.
+
+**Considered:** leaving the old cool-blue/system-ui palette and only adding the toast/
+progress fixes — rejected since Tier 3 in `docs/fixes.md` was explicitly blocked on this
+exact branding call, and the user supplied the finished token proposal rather than asking
+for a redesign to be invented.
+
+**Why:** the toast/progress-bar items had been sitting blocked on "pick branding
+direction" (`docs/fixes.md` Tier 3) since the last polish pass; doing the token swap and
+the two dependent fixes together avoids a second review cycle. Kept old tokens instead of
+deleting them because `components.css` references `--color-progress-track/fill` and
+`--color-toast-bg/text` directly — dropping them silently would have been exactly the
+"variant rule" violation CLAUDE.md warns about (a code change forced by an incomplete
+config surface).
+
+**Fonts:** no network fetch tool was available in-session; used `npm install
+@fontsource/space-grotesk @fontsource/geist-sans` purely to extract the 5 needed
+`.woff2`/`.woff` files (OFL/SIL-licensed, matching upstream Google Fonts / Vercel Geist
+exactly) into `styles/fonts/`, then removed `node_modules`/`package.json`/
+`package-lock.json` immediately — the repo stays dependency-free and build-step-free per
+CLAUDE.md; npm was a one-time asset-extraction tool, not a runtime dependency.
+
+**Bug found during verification, not requested but necessary:** `creatives/export.js`
+resolves `var()` for wkhtmltoimage and then strips the `<link>` to `tokens.css` entirely
+(that renderer can't parse custom properties — documented from the prior session). That
+also silently dropped tokens.css's `@font-face` rules, so the exported PNGs rendered in a
+system-font fallback despite the live app's fonts being correct. Fixed by extracting the
+`@font-face` blocks from `tokens.css`, resolving their own `var()` references, rewriting
+their `./fonts/` paths to `../styles/fonts/` (temp file lives in `creatives/`, not
+`styles/`), and re-inlining them as a `<style>` block in place of the removed `<link>`.
+Also added a `.woff` sibling for each weight in the `@font-face` `src` list — wkhtmltoimage
+0.12.6 ships a Qt WebKit build that predates woff2 support entirely, same "old renderer,
+modern format" class of gap as its missing `var()` support. Confirmed the fix by re-viewing
+the exported PNGs directly (not just confirming the script exited 0): Space Grotesk now
+renders correctly in all 3 creatives, at unchanged pixel dimensions (320×50 / 250×250 /
+1080×1920).
+
+**Verification:** rendered entry, quiz (q1 matrix + q6), partialResult, fullResult and all
+3 A/B variants at 360×640, 390×844, and 480px desktop via Puppeteer (temporary
+`npm install puppeteer`, removed after) — no overflow or clipping at any breakpoint. The
+entry headline ("Discover your IQ score") now wraps to 2 lines at all 3 widths where it
+may have fit on fewer lines under the old system-ui stack (Space Grotesk Bold is wider
+per character) — flagged, not fixed, since it doesn't overflow or get clipped and no
+single-line constraint was requested. Contrast checked via WCAG relative-luminance
+formula: `--color-primary` (#1C61C9) on `--color-bg` = 5.50:1, on white = 5.83:1, white
+text on primary buttons = 5.83:1 — all ≥4.5:1.
+
+**AI's role:** Claude flagged two blockers before starting (no fetch tool for the fonts;
+the user's prose description of the proposed tokens didn't include the actual file) and
+paused for the user to resolve both — the user then supplied the real tokens.css and
+suggested the `@fontsource` npm packages as the font source. Claude did the merge, the
+global heading rule, the toast/progress-bar fixes, discovered and fixed the export
+pipeline's `@font-face`-dropping bug and the woff2-support gap, re-exported and visually
+verified the creatives, ran the cross-viewport/contrast verification, and removed all npm
+artifacts before finishing, without further user direction on those specifics.
+
+---
+
 ## 2026-09-24 — Build A/B visual polish: card fill, icon sizing, CTA wording
 
 **Decision:** three fixes to `creative-1080x1920.html` (Build A) and

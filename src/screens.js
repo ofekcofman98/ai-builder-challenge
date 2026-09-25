@@ -72,12 +72,16 @@ function shapeOptionButton(action, index, label, iconSvg) {
   '</button>';
 }
 
-// Small inline-SVG mark for the entry hero — three overlapping shapes,
-// echoing the pattern-recognition question type without being a mascot
-// (write-up.md rules those out). Inline, no asset file, no CDN.
-function heroMark() {
+// Inline-SVG mark — three overlapping shapes, echoing the pattern-
+// recognition question type without being a mascot (write-up.md rules
+// those out). Inline, no asset file, no CDN. Shared by the entry hero
+// (large) and the quiz header's persistent brand mark (small, see
+// CONFIG.quiz.showLogo) — same SVG, sized/classed per call site so a
+// single source stays the one place this mark is drawn.
+function logoMark(size, extraClass) {
   return (
-    '<svg class="entry-icon" viewBox="0 0 64 64" width="48" height="48" aria-hidden="true">' +
+    '<svg class="logo-mark' + (extraClass ? ' ' + extraClass : '') +
+      '" viewBox="0 0 64 64" width="' + size + '" height="' + size + '" aria-hidden="true">' +
       '<circle cx="24" cy="24" r="14" fill="var(--color-primary)" opacity="0.85"/>' +
       '<rect x="30" y="30" width="24" height="24" rx="4" fill="var(--color-primary)" opacity="0.55"/>' +
       '<polygon points="16,52 28,52 22,40" fill="var(--color-primary)" opacity="0.7"/>' +
@@ -168,7 +172,7 @@ IQLY.screens = {
       // quiz screen onward instead (state.getProgressPercent()).
       '<div class="screen screen-entry">' +
         '<div class="entry-hero">' +
-          heroMark() +
+          logoMark(48, 'entry-icon') +
           '<h1>' + escapeHtml(copy.headline) + '</h1>' +
           '<p class="text-muted">' + escapeHtml(copy.subheadline) + '</p>' +
           '<p class="text-muted trust-cue">' + escapeHtml(copy.trustCue) + '</p>' +
@@ -226,6 +230,12 @@ IQLY.screens = {
 
     return (
       '<div class="screen screen-quiz">' +
+        // Persistent brand mark — keeps IQly visible through the whole
+        // quiz (previously only shown on the entry screen, before the quiz
+        // screens replace it entirely). Its own row above everything else,
+        // including the progress bar, not sharing a line with "Question X
+        // of Y" — top-left of the screen, full stop.
+        '<div class="quiz-brand">' + logoMark(24, 'quiz-logo') + '</div>' +
         progressBar(percent) +
         // Fixed-height slot, always rendered — render.js fills/clears the
         // text and toggles visibility, but the reserved space never

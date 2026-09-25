@@ -30,17 +30,20 @@ sequences need to be in new line, the missing part should be marked (user-friend
 - Fixed-height answer container: extend to cover image questions too
 - Sequence questions: line-break + visually mark the missing element
 
-## Tier 2 — Cheap, clear-value polish
-- "Question X of Y" positioned directly above progress bar
-- Gentle CSS transition animation on progress bar fill
+## Tier 2 — Cheap, clear-value polish — CLOSED (2026-09-25)
+- "Question X of Y" positioned directly above progress bar — done (pre-existing)
+- Gentle CSS transition animation on progress bar fill — done (`components.css`
+  `.progress-fill`'s `transition: width var(--duration-base) ease`)
 - Partial-result screen: trim breakdown height so email field sits
   closer to top (no landing-page-with-sections — stays consistent
-  with the rest of the flow's minimalism)
+  with the rest of the flow's minimalism) — done (pre-existing)
 
-## Tier 3 — Blocked on a decision from me
-- Feedback toast color/motion: waiting on branding direction
-  (clinical vs. tech-modern) before choosing colors
-- [Decision to make: pick branding direction before this proceeds]
+## Tier 3 — Blocked on a decision from me — CLOSED (2026-09-25)
+- Feedback toast color/motion: branding direction resolved (navy accent +
+  Space Grotesk/Geist Sans, see docs/AI_WORKFLOW.md 2026-09-25 entry). Toast
+  now uses `var(--color-success)`/`var(--color-success-bg)` (was black) with
+  a fade + slight slide-in on show, matching `.toast-slot-text`'s existing
+  transition convention.
 
 ## Tier 4 — Nice-to-have, only if time remains after Part 3
 - Wizard-style progress component (redesign, not a fix)

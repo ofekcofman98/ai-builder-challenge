@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+  <title>IQly — Guardrail Test Results</title>
+  <link rel="icon" href="data:," />
+
+  <link rel="stylesheet" href="styles/tokens.css" />
+  <link rel="stylesheet" href="styles/base.css" />
+  <link rel="stylesheet" href="styles/components.css" />
+</head>
+<body>
+  <!--
+    Standalone growth dashboard (docs/dashboard.md). Simulated data only —
+    no live traffic exists yet, so there's nothing for a "Live" mode to
+    read from tracking.js (see the Rejected/deferred section of the spec).
+    All numbers below are transcribed verbatim from that spec's fixed data
+    table; nothing here is recalculated or invented.
+
+    The point of this page isn't "here are 3 test results" — it's showing
+    the guardrail KPI doing its job: catching cases where the primary
+    metric alone would have shipped a regression (Tests 1 and 2 both look
+    like wins on their primary number and are marked Inconclusive/Kill
+    anyway once the guardrail and net funnel math are accounted for).
+  -->
+  <div class="dashboard">
+
+    <div class="dashboard-banner">
+      ⚠️ Simulated data — no live traffic yet. Numbers below model expected
+      behavior per the Part 2 write-up guardrail definitions; they are not
+      pulled from real tracking.js events.
+    </div>
+
+    <header class="dashboard-header">
+      <h1>Guardrail-Driven Test Results</h1>
+      <p class="text-muted">
+        Each Part 2 variant carries a primary KPI (what the test was
+        designed to move) and a guardrail KPI (what could break while the
+        primary metric still looks good). The verdict below is decided on
+        both together, not the primary metric alone.
+      </p>
+    </header>
+
+    <section class="dashboard-section">
+      <h2>Net CVR by test</h2>
+      <div class="net-cvr-chart" id="net-cvr-chart" role="img" aria-label="Net CVR comparison: control 18.1%, Test 2 16.8%, Test 3 20.2%"></div>
+      <p class="text-muted net-cvr-chart-caption">
+        Test 1 is excluded from this chart — its primary KPI (gate→account)
+        measures a different funnel span than a full visit→account CVR, so
+        it isn't a comparable number (see its card below).
+      </p>
+    </section>
+
+    <section class="dashboard-section">
+      <h2>Funnel comparison</h2>
+      <div class="funnel-rows">
+
+        <div class="funnel-row">
+          <span class="funnel-row-label">Control (baseline funnel)</span>
+          <div class="funnel-track">
+            <div class="funnel-step">
+              <span>Visit → Quiz start</span>
+              <span class="funnel-step-value">72%</span>
+            </div>
+            <div class="funnel-step">
+              <span>Quiz start → Completion</span>
+              <span class="funnel-step-value">65%</span>
+            </div>
+            <div class="funnel-step">
+              <span>Completion → Result</span>
+              <span class="funnel-step-value">92%</span>
+            </div>
+            <div class="funnel-step">
+              <span>Result → Account created</span>
+              <span class="funnel-step-value">42%</span>
+            </div>
+            <div class="funnel-step">
+              <span>Modeled overall CVR</span>
+              <span class="funnel-step-value">18.1%</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="funnel-row">
+          <span class="funnel-row-label">Test 1 — Gate after Q4</span>
+          <div class="funnel-track">
+            <div class="funnel-step">
+              <span>Gate reached → Account created (primary)</span>
+              <span class="funnel-step-value is-good">55% <span class="text-muted">vs. 42%</span></span>
+            </div>
+            <div class="funnel-step is-guardrail">
+              <span>Drop-off in Q5–Q6, right after the gate (guardrail)</span>
+              <span class="funnel-step-value is-bad">21% <span class="text-muted">vs. ~12% expected</span></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="funnel-row">
+          <span class="funnel-row-label">Test 2 — Shorter quiz (5 questions)</span>
+          <div class="funnel-track">
+            <div class="funnel-step">
+              <span>Quiz start → Completion (primary)</span>
+              <span class="funnel-step-value is-good">77% <span class="text-muted">vs. 65%</span></span>
+            </div>
+            <div class="funnel-step is-guardrail">
+              <span>Result → Account created (guardrail)</span>
+              <span class="funnel-step-value is-bad">33% <span class="text-muted">vs. 42%</span></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="funnel-row">
+          <span class="funnel-row-label">Test 3 — Percentile framing</span>
+          <div class="funnel-track">
+            <div class="funnel-step">
+              <span>Result → Account created (primary)</span>
+              <span class="funnel-step-value is-good">47% <span class="text-muted">vs. 42%</span></span>
+            </div>
+            <div class="funnel-step is-guardrail">
+              <span>Time-on-screen before click (guardrail)</span>
+              <span class="funnel-step-value is-bad">9s <span class="text-muted">vs. 14s</span></span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <section class="dashboard-section">
+      <h2>Test cards</h2>
+      <div class="test-cards">
+
+        <!-- Test 1: primary KPI reads as a clear win (55% vs 42%), but it
+             measures a different funnel span than control (gate→account,
+             not full result→account) and the guardrail spike alongside it
+             suggests sunk-cost pressure rather than genuine intent. -->
+        <div class="card test-card">
+          <div class="test-card-header">
+            <h3>Test 1 — Gate after Q4</h3>
+            <span class="verdict-tag verdict-tag--inconclusive">Inconclusive</span>
+          </div>
+
+          <div class="guardrail-callout">
+            The primary KPI alone looks like a strong win here — that's
+            exactly why the guardrail matters. It isn't apples-to-apples
+            with control's metric, and it moving with the primary number
+            is a red flag, not confirmation.
+          </div>
+
+          <div class="kpi-grid">
+            <div class="kpi-row">
+              <span class="kpi-label">Primary — gate reached → account created</span>
+              <div class="kpi-value-row">
+                <span class="kpi-value">42% → 55%</span>
+                <span class="kpi-bar" data-before="42" data-after="55" data-max="100" data-direction="good"></span>
+              </div>
+            </div>
+            <div class="kpi-row">
+              <span class="kpi-label">Guardrail — drop-off in Q5–Q6 (post-gate)</span>
+              <div class="kpi-value-row">
+                <span class="kpi-value">~12% expected → 21%</span>
+                <span class="kpi-bar" data-before="12" data-after="21" data-max="100" data-direction="bad"></span>
+              </div>
+            </div>
+          </div>
+
+          <p>
+            The guardrail rises alongside the primary metric — the
+            sunk-cost effect may be masking a flow-break rather than
+            confirming the hypothesis, exactly the risk flagged in the
+            Part 2 write-up. The primary KPI also measures a different
+            funnel span than control's (gate→account vs. full
+            result→account), so it isn't apples-to-apples. Recommend
+            re-measuring as full visit→account CVR before shipping.
+          </p>
+        </div>
+
+        <!-- Test 2: primary KPI (completion rate) is a clear win, but the
+             guardrail catches exactly what it's for — a thinner-feeling
+             result hurts conversion enough that the net funnel is worse
+             than control despite the primary metric looking great. -->
+        <div class="card test-card">
+          <div class="test-card-header">
+            <h3>Test 2 — Shorter quiz (5 questions)</h3>
+            <span class="verdict-tag verdict-tag--kill">Kill</span>
+          </div>
+
+          <div class="guardrail-callout">
+            Completion rate went up — the primary KPI looks like a clean
+            win on its own. The guardrail (and the net funnel math below)
+            is what shows it isn't.
+          </div>
+
+          <div class="kpi-grid">
+            <div class="kpi-row">
+              <span class="kpi-label">Primary — quiz start → completion</span>
+              <div class="kpi-value-row">
+                <span class="kpi-value">65% → 77%</span>
+                <span class="kpi-bar" data-before="65" data-after="77" data-max="100" data-direction="good"></span>
+              </div>
+            </div>
+            <div class="kpi-row">
+              <span class="kpi-label">Guardrail — result → account created</span>
+              <div class="kpi-value-row">
+                <span class="kpi-value">42% → 33%</span>
+                <span class="kpi-bar" data-before="42" data-after="33" data-max="100" data-direction="bad"></span>
+              </div>
+            </div>
+          </div>
+
+          <div class="net-cvr-math">
+            72% × 77% × 92% × 33% ≈ <span class="net-cvr-result">16.8%</span>
+            <span class="text-muted">(vs. 18.1% control baseline)</span>
+          </div>
+
+          <p>
+            The guardrail catches exactly what it's for: completion went
+            up, but the "thinner"-feeling result (fewer category data
+            points) hurt conversion enough to make the net funnel worse
+            than control.
+          </p>
+        </div>
+
+        <!-- Test 3: both primary and net CVR improve — a genuine lift.
+             Faster time-on-screen is flagged as a secondary watch-item,
+             not a reason to hold the ship decision. -->
+        <div class="card test-card">
+          <div class="test-card-header">
+            <h3>Test 3 — Percentile framing</h3>
+            <span class="verdict-tag verdict-tag--ship">Ship</span>
+          </div>
+
+          <div class="kpi-grid">
+            <div class="kpi-row">
+              <span class="kpi-label">Primary — result → account created</span>
+              <div class="kpi-value-row">
+                <span class="kpi-value">42% → 47%</span>
+                <span class="kpi-bar" data-before="42" data-after="47" data-max="100" data-direction="good"></span>
+              </div>
+            </div>
+            <div class="kpi-row">
+              <span class="kpi-label">Guardrail — time-on-screen before click</span>
+              <div class="kpi-value-row">
+                <span class="kpi-value">14s → 9s</span>
+                <span class="kpi-bar" data-before="14" data-after="9" data-max="20" data-direction="bad"></span>
+              </div>
+            </div>
+          </div>
+
+          <div class="net-cvr-math">
+            72% × 65% × 92% × 47% ≈ <span class="net-cvr-result">20.2%</span>
+            <span class="text-muted">(vs. 18.1% control baseline)</span>
+          </div>
+
+          <p>
+            Both primary and net CVR improve. The shorter time-on-screen is
+            a secondary watch-item (faster, more impulsive click) worth
+            monitoring post-launch, not a reason to hold the ship decision.
+          </p>
+        </div>
+
+      </div>
+    </section>
+
+  </div>
+
+  <!--
+    Chart generation — plain inline SVG, no library/CDN (CLAUDE.md hard
+    constraint: file:// must keep working offline). Same pattern as
+    src/screens.js's percentileCurve()/logoMark(): a JS function returns an
+    SVG string, colors pulled from tokens.css via var() so the chart
+    inherits the page's palette automatically. This page has no state
+    machine or CONFIG of its own (it's outside the IQLY quiz flow), so
+    these are self-contained rather than living in IQLY.screens.
+  -->
+  <script>
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    // Net-CVR summary chart — one bar per full-funnel-comparable test.
+    // Bar color signals the verdict directly (danger/success), not the
+    // brand accent — this is an internal report, not the quiz product.
+    function netCvrChart(entries) {
+      var width = 560;
+      var height = 170;
+      var barWidth = 96;
+      var gap = 48;
+      var baseline = 130;
+      var chartHeight = 96;
+      var maxValue = Math.max.apply(null, entries.map(function (e) { return e.value; })) * 1.25;
+      var totalWidth = entries.length * barWidth + (entries.length - 1) * gap;
+      var startX = (width - totalWidth) / 2;
+
+      var bars = entries.map(function (entry, i) {
+        var x = startX + i * (barWidth + gap);
+        var barHeight = (entry.value / maxValue) * chartHeight;
+        var y = baseline - barHeight;
+        return (
+          '<rect x="' + x.toFixed(1) + '" y="' + y.toFixed(1) + '" width="' + barWidth +
+            '" height="' + barHeight.toFixed(1) + '" rx="6" fill="' + entry.color + '"/>' +
+          '<text x="' + (x + barWidth / 2).toFixed(1) + '" y="' + (y - 10).toFixed(1) +
+            '" text-anchor="middle" font-size="16" font-weight="700" fill="var(--color-text)">' +
+            entry.value.toFixed(1) + '%</text>' +
+          '<text x="' + (x + barWidth / 2).toFixed(1) + '" y="' + (baseline + 22).toFixed(1) +
+            '" text-anchor="middle" font-size="12" fill="var(--color-text-muted)">' +
+            escapeHtml(entry.label) + '</text>'
+        );
+      }).join('');
+
+      return (
+        '<svg class="net-cvr-chart-svg" viewBox="0 0 ' + width + ' ' + height + '" ' +
+          'preserveAspectRatio="xMidYMid meet" aria-hidden="true">' +
+          '<line x1="' + startX.toFixed(1) + '" y1="' + baseline + '" x2="' +
+            (startX + totalWidth).toFixed(1) + '" y2="' + baseline +
+            '" stroke="var(--color-border)" stroke-width="1"/>' +
+          bars +
+        '</svg>'
+      );
+    }
+
+    // Compact before/after bar pair for a single KPI row — two stacked
+    // tracks (before, after), the "after" track colored by whether this
+    // specific row moved in a good or bad direction. Values are scaled
+    // against `max` rather than assumed to be 0-100, so a non-percentage
+    // metric (time-on-screen) scales sensibly too.
+    function kpiBarSvg(before, after, max, direction) {
+      var width = 84;
+      var height = 24;
+      var barH = 8;
+      var afterColor = direction === 'good' ? 'var(--color-success)' : 'var(--color-danger)';
+      var beforeWidth = Math.max(2, (before / max) * width);
+      var afterWidth = Math.max(2, (after / max) * width);
+
+      return (
+        '<svg viewBox="0 0 ' + width + ' ' + height + '" width="' + width + '" height="' +
+          height + '" aria-hidden="true">' +
+          '<rect x="0" y="2" width="' + width + '" height="' + barH +
+            '" rx="3" fill="var(--color-border)"/>' +
+          '<rect x="0" y="2" width="' + beforeWidth.toFixed(1) + '" height="' + barH +
+            '" rx="3" fill="var(--color-text-muted)" opacity="0.6"/>' +
+          '<rect x="0" y="' + (2 + barH + 4) + '" width="' + width + '" height="' + barH +
+            '" rx="3" fill="var(--color-border)"/>' +
+          '<rect x="0" y="' + (2 + barH + 4) + '" width="' + afterWidth.toFixed(1) + '" height="' + barH +
+            '" rx="3" fill="' + afterColor + '"/>' +
+        '</svg>'
+      );
+    }
+
+    document.getElementById('net-cvr-chart').innerHTML = netCvrChart([
+      { label: 'Control', value: 18.1, color: 'var(--color-text-muted)' },
+      { label: 'Test 2', value: 16.8, color: 'var(--color-danger)' },
+      { label: 'Test 3', value: 20.2, color: 'var(--color-success)' }
+    ]);
+
+    Array.prototype.forEach.call(document.querySelectorAll('.kpi-bar'), function (el) {
+      el.innerHTML = kpiBarSvg(
+        Number(el.dataset.before),
+        Number(el.dataset.after),
+        Number(el.dataset.max),
+        el.dataset.direction
+      );
+    });
+  </script>
+</body>
+</html>

@@ -3,24 +3,85 @@
   base.css and components.css must reference these custom properties, never
   hardcode a value. This is what lets a Part 2 variant restyle a single element
   (e.g. CTA color for an urgency test) without touching layout files.
+
+  Branding pass (2026-09-25): navy accent + Space Grotesk/Geist Sans, merged
+  from a proposed tokens.css rather than replacing this file wholesale — see
+  docs/AI_WORKFLOW.md for what changed and why. Fonts embedded locally as
+  woff2 under ./fonts/ (no CDN — required for offline file:// use and for the
+  wkhtmltoimage export pipeline, see creatives/export.js).
 */
 
+/* woff2 first for every real browser; a woff fallback per weight covers
+   creatives/export.js's wkhtmltoimage renderer, whose Qt WebKit predates
+   woff2 support entirely (same class of "old renderer, modern format"
+   gap as its lack of var() support — see that file's header comment). */
+@font-face {
+  font-family: 'Space Grotesk';
+  src: url('./fonts/SpaceGrotesk-Bold.woff2') format('woff2'),
+       url('./fonts/SpaceGrotesk-Bold.woff') format('woff');
+  font-weight: 700;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Space Grotesk';
+  src: url('./fonts/SpaceGrotesk-Medium.woff2') format('woff2'),
+       url('./fonts/SpaceGrotesk-Medium.woff') format('woff');
+  font-weight: 500;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Geist Sans';
+  src: url('./fonts/Geist-Regular.woff2') format('woff2'),
+       url('./fonts/Geist-Regular.woff') format('woff');
+  font-weight: 400;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Geist Sans';
+  src: url('./fonts/Geist-Medium.woff2') format('woff2'),
+       url('./fonts/Geist-Medium.woff') format('woff');
+  font-weight: 500;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Geist Sans';
+  src: url('./fonts/Geist-SemiBold.woff2') format('woff2'),
+       url('./fonts/Geist-SemiBold.woff') format('woff');
+  font-weight: 600;
+  font-display: swap;
+}
+
 :root {
-  /* Color — neutral, trust-forward palette. No monetary/price cues (see
-     write-up.md: early $ signage was an observed trust-signal failure). */
-  --color-bg: #ffffff;
-  --color-surface: #f6f7fb;
-  --color-text: #12131a;
-  --color-text-muted: #5a5f72;
-  --color-primary: #3d5afe;
-  --color-primary-hover: #2e46e0;
+  /* Color — navy accent, warm neutrals (see docs/AI_WORKFLOW.md: replaces
+     the earlier cool-blue/pure-white palette). No monetary/price cues
+     (write-up.md: early $ signage was an observed trust-signal failure). */
+  --color-bg: #FAF8F5;
+  --color-surface: #FFFFFF;
+  --color-text: #1A1918;
+  --color-text-muted: #6B6862;
+  --color-primary: #1C61C9;
+  --color-primary-hover: #17509E;
+  --color-primary-soft: #E8EFFC;
   --color-primary-contrast: #ffffff;
-  --color-success: #1fa97a;
-  --color-border: #e2e4ec;
-  --color-progress-track: #e2e4ec;
-  --color-progress-fill: #3d5afe;
-  --color-toast-bg: #12131a;
-  --color-toast-text: #ffffff;
+  --color-success: #1E7A4C;
+  --color-success-bg: #E7F3EC;
+  --color-border: #E4E0D8;
+
+  /* Dashboard verdict tags (docs/dashboard.md) — danger/warning added
+     alongside the existing success pair, same naming + contrast approach
+     (dark text-safe hue on a light tint background). */
+  --color-danger: #B3261E;
+  --color-danger-bg: #FBEAE9;
+  --color-warning: #8A5A00;
+  --color-warning-bg: #FCF0D9;
+
+  /* Progress bar / toast — kept as their own tokens (not in the proposal)
+     but re-pointed at the new palette rather than dropped, since
+     components.css references them directly. */
+  --color-progress-track: var(--color-border);
+  --color-progress-fill: var(--color-primary);
+  --color-toast-bg: var(--color-success);
+  --color-toast-text: var(--color-success-bg);
 
   /* Spacing scale — 4px base unit */
   --space-1: 4px;
@@ -33,7 +94,8 @@
   --space-8: 64px;
 
   /* Typography */
-  --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-heading: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-family: 'Geist Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   --font-size-sm: 0.875rem;
   --font-size-base: 1rem;
   --font-size-lg: 1.25rem;
@@ -42,12 +104,15 @@
   --line-height-base: 1.5;
   --line-height-tight: 1.2;
   --font-weight-regular: 400;
-  --font-weight-medium: 600;
+  --font-weight-medium: 500;
   --font-weight-bold: 700;
 
-  /* Shape */
-  --radius-sm: 8px;
-  --radius-md: 14px;
+  /* Shape — tighter radii per the branding pass (was 8/14px + a pill
+     token); --radius-pill is kept since components.css relies on it for
+     buttons/chips/progress tracks, which the proposal didn't cover. */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 10px;
   --radius-pill: 999px;
 
   /* Motion */
@@ -56,7 +121,9 @@
   --duration-toast: 3000ms; /* mirrors CONFIG.feedback.autoDismissMs default */
 
   /* Elevation */
-  --shadow-card: 0 8px 24px rgba(18, 19, 26, 0.08);
+  --shadow-sm: 0 1px 2px rgba(26, 25, 24, 0.06);
+  --shadow-md: 0 2px 6px rgba(26, 25, 24, 0.08);
+  --shadow-card: var(--shadow-md);
 
   /* Layout */
   --content-max-width: 480px; /* mobile-first: single reading column even on desktop */

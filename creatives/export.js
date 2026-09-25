@@ -70,9 +70,22 @@ function main() {
 
     // wkhtmltoimage also chokes on the <link> to tokens.css itself once
     // var() is gone from the HTML — drop it from the temp copy only.
+    // But tokens.css also carries the @font-face rules (branding pass,
+    // 2026-09-25) — dropping the link silently dropped those too, so the
+    // creatives rendered in a system-font fallback despite CONFIG's fonts
+    // being embedded correctly for real browsers. Re-inline just the
+    // @font-face blocks (already resolved against `tokens` above, since
+    // they can reference var() themselves) before the link is removed.
+    // tokens.css's own url('./fonts/...') is relative to styles/, but the
+    // temp copy lives in creatives/ — rewrite to the same ../styles/fonts/
+    // path the creative HTML files already use for other styles/ assets.
+    const fontFaceBlocks = (tokensCss.match(/@font-face\s*{[^}]*}/g) || [])
+      .map(function (block) { return resolveVars(block, tokens); })
+      .map(function (block) { return block.replace(/url\(['"]?\.\/fonts\//g, "url('../styles/fonts/"); })
+      .join('\n');
     let withoutTokensLink = resolvedHtml.replace(
       /<link[^>]*tokens\.css[^>]*>\s*/i,
-      ''
+      '<style>' + fontFaceBlocks + '</style>\n'
     );
 
     // Creative 2+ inject SVG markup at runtime (from questions.js's

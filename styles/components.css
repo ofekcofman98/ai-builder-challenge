@@ -207,22 +207,26 @@
 }
 
 /* Toast — non-blocking mid-quiz feedback. Slides in above the question,
-   never overlays answer options (write-up.md: competitor pattern). */
+   never overlays answer options (write-up.md: competitor pattern). Success
+   green (not the earlier black) plus a fade + slight slide, matching the
+   fade/translateY convention already used by .toast-slot-text below. */
 .toast {
   position: fixed;
   top: var(--space-4);
   left: 50%;
+  opacity: 0;
   transform: translate(-50%, -150%);
   background: var(--color-toast-bg);
   color: var(--color-toast-text);
   padding: var(--space-3) var(--space-5);
   border-radius: var(--radius-pill);
   font-size: var(--font-size-sm);
-  transition: transform var(--duration-base) ease;
+  transition: transform var(--duration-base) ease, opacity var(--duration-base) ease;
   z-index: 10;
 }
 
 .toast.is-visible {
+  opacity: 1;
   transform: translate(-50%, 0);
 }
 
@@ -326,6 +330,16 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+}
+
+/* Brand mark's own row, top-left of the quiz screen, above the progress
+   bar and everything else — not sharing a line with "Question X of Y". */
+.quiz-brand {
+  display: flex;
+}
+
+.quiz-logo {
+  flex-shrink: 0;
 }
 
 /* Reserves consistent vertical space regardless of prompt length or
@@ -648,5 +662,251 @@
 
   .upsell-grid {
     grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* Dashboard (dashboard.html) — a report page, not a funnel screen, so it
+   uses its own wide container rather than #app's phone-width column
+   (base.css). Reuses .card/.btn tokens throughout for visual consistency
+   with the flow it's reporting on. */
+.dashboard {
+  width: 100%;
+  max-width: 960px;
+  margin: 0 auto;
+  padding: var(--space-5) var(--space-4) var(--space-8);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.dashboard-header h1 {
+  font-size: var(--font-size-xl);
+}
+
+/* Simulated-data banner — deliberately given the same visual weight as
+   the rest of the page (docs/dashboard.md: not a small subtle notice),
+   so nobody mistakes these numbers for real tracking.js output. */
+.dashboard-banner {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-4) var(--space-5);
+  background: var(--color-warning-bg);
+  color: var(--color-warning);
+  border: 1px solid var(--color-warning);
+  border-radius: var(--radius-md);
+  font-weight: var(--font-weight-medium);
+}
+
+.dashboard-section h2 {
+  margin-bottom: var(--space-4);
+}
+
+/* Net-CVR summary chart — a small at-a-glance bar chart above the funnel
+   rows, not the page's focal point. The SVG itself is intrinsically
+   responsive (viewBox + width:100%), so this wrapper only caps its max
+   width and centers it. */
+.net-cvr-chart {
+  max-width: 560px;
+  margin: 0 auto;
+}
+
+.net-cvr-chart-svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.net-cvr-chart-caption {
+  max-width: 560px;
+  margin: var(--space-2) auto 0;
+  text-align: center;
+}
+
+/* Funnel comparison — one row per test (control vs. that test's own
+   primary/guardrail stage), not one combined chart across all 3 variants
+   (docs/dashboard.md: rejected as visually crowded). */
+.funnel-rows {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.funnel-row {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.funnel-row-label {
+  font-weight: var(--font-weight-medium);
+}
+
+.funnel-track {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.funnel-step {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  font-size: var(--font-size-sm);
+}
+
+.funnel-step-value {
+  font-weight: var(--font-weight-bold);
+  white-space: nowrap;
+}
+
+/* Guardrail step is visually distinct from a plain comparison row — its
+   value color signals whether it moved in a healthy or worrying direction
+   (set per-card via .is-good / .is-bad, not hardcoded here). */
+.funnel-step.is-guardrail {
+  border-style: dashed;
+}
+
+.funnel-step-value.is-good {
+  color: var(--color-success);
+}
+
+.funnel-step-value.is-bad {
+  color: var(--color-danger);
+}
+
+/* Test cards */
+.test-cards {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.test-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.test-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.kpi-grid {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.kpi-row {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-3);
+  background: var(--color-bg);
+  border-radius: var(--radius-sm);
+}
+
+.kpi-label {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}
+
+.kpi-value {
+  font-weight: var(--font-weight-bold);
+}
+
+/* Pairs the text KPI value with its inline before/after bar (kpiBarSvg()
+   in dashboard.html) — wraps at narrow widths rather than clipping the
+   bar off the edge of the card. */
+.kpi-value-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.kpi-bar {
+  flex-shrink: 0;
+  display: inline-flex;
+}
+
+/* Net-CVR math — shown explicitly rather than just stating the final
+   number, so the reader can verify the multiplication themselves
+   (docs/dashboard.md: Tests 2 & 3 only). */
+.net-cvr-math {
+  font-family: monospace;
+  font-size: var(--font-size-sm);
+  padding: var(--space-3);
+  background: var(--color-bg);
+  border-radius: var(--radius-sm);
+  overflow-x: auto;
+  white-space: nowrap;
+}
+
+.net-cvr-result {
+  font-weight: var(--font-weight-bold);
+}
+
+/* Verdict tag — the one thing on each card that must be scannable without
+   reading the rest (docs/dashboard.md). Color alone never carries the
+   meaning: the word itself (Ship/Kill/Inconclusive) is always present. */
+.verdict-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-pill);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  white-space: nowrap;
+}
+
+.verdict-tag--ship {
+  background: var(--color-success-bg);
+  color: var(--color-success);
+}
+
+.verdict-tag--kill {
+  background: var(--color-danger-bg);
+  color: var(--color-danger);
+}
+
+.verdict-tag--inconclusive {
+  background: var(--color-warning-bg);
+  color: var(--color-warning);
+}
+
+/* Callout inside a card flagging that the primary KPI alone would have
+   read as a win — the whole point of the guardrail framing, so it's never
+   left implicit (docs/dashboard.md). */
+.guardrail-callout {
+  padding: var(--space-3);
+  border-left: 3px solid var(--color-warning);
+  background: var(--color-warning-bg);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-sm);
+}
+
+@media (min-width: 768px) {
+  .dashboard {
+    padding: var(--space-7) var(--space-5) var(--space-8);
+  }
+
+  .kpi-grid {
+    flex-direction: row;
+  }
+
+  .kpi-row {
+    flex: 1;
   }
 }
