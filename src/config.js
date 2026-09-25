@@ -76,10 +76,20 @@ IQLY.CONFIG = {
     showTrustBadgeBeforeCta: true,
   },
 
+  processingResult: {
+    // Brief, honest pacing between email submit and the result reveal —
+    // the account creation genuinely is being processed here, this just
+    // makes that visible instead of an instant, "did anything happen?"
+    // jump straight to the result (docs/fixes.md item 3). Mirrors the
+    // analyzing screen's labor-illusion timing, owned by render.js the
+    // same way.
+    durationMs: 900,
+  },
+
   copy: {
     entry: {
       headline: 'Discover your IQ score',
-      subheadline: 'Free · about 3 minutes',
+      subheadline: 'Free · about 2 minutes',
       trustCue: 'Based on established cognitive-testing methodology. We never sell your data.',
     },
     quiz: {
@@ -93,6 +103,9 @@ IQLY.CONFIG = {
       analyzingResponses: 'Analyzing your responses...',
       comparingBenchmark: 'Comparing against benchmark data...',
       calculatingProfile: 'Calculating your profile...',
+    },
+    processingResult: {
+      message: 'Calculating your results...',
     },
     partialResult: {
       standoutLabel: 'Your Standout Strength',
@@ -182,6 +195,12 @@ IQLY.CONFIG = {
     // Identifies which flow variant produced an event, so Part 1 baseline
     // and Part 2 test data stay separable in localStorage.
     variantId: 'control',
+  },
+
+  persistence: {
+    // Separate key from tracking.storageKey: this one is read back and
+    // validated to resume a session, not just appended to as a log.
+    storageKey: 'iqly_progress',
   },
 };
 

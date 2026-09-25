@@ -35,26 +35,35 @@ IQLY.init = function () {
   IQLY.track('page_view', {});
 
   var answerParam = readAnswerParam();
+  var skipRequested = readSkipParam() === 'entry' || !!answerParam;
 
-  if (readSkipParam() === 'entry' || answerParam) {
-    IQLY.state.skipToQuiz();
-    // Stands in for handleSoftEntry()'s quiz_started call (render.js),
-    // which this path never runs — the transition still needs a fired
-    // event, just tagged so the funnel data can separate deep-link
-    // entrants from the organic soft-entry path.
-    IQLY.track('quiz_started', { source: 'creative_deep_link' });
-  }
+  // A deep-link visit (ad creative) is a deliberate fresh entry point, so
+  // it takes priority over any stale progress left in localStorage from an
+  // earlier, unrelated session — restore is only attempted when neither
+  // deep-link param is present.
+  var restored = !skipRequested && IQLY.state.restoreSnapshot(IQLY.persistence.load());
 
-  // Only honored when it targets the next unanswered question — a stale
-  // or malformed link (wrong index, or the quiz already moved on) is
-  // ignored rather than corrupting state.answers order.
-  if (answerParam && answerParam.questionIndex === IQLY.state.getAnswers().length) {
-    IQLY.state.recordAnswer(answerParam.answerIndex);
-    IQLY.track('question_answered', {
-      questionIndex: answerParam.questionIndex + 1,
-      source: 'creative_deep_link',
-    });
-    IQLY.state.advance();
+  if (!restored) {
+    if (skipRequested) {
+      IQLY.state.skipToQuiz();
+      // Stands in for handleSoftEntry()'s quiz_started call (render.js),
+      // which this path never runs — the transition still needs a fired
+      // event, just tagged so the funnel data can separate deep-link
+      // entrants from the organic soft-entry path.
+      IQLY.track('quiz_started', { source: 'creative_deep_link' });
+    }
+
+    // Only honored when it targets the next unanswered question — a stale
+    // or malformed link (wrong index, or the quiz already moved on) is
+    // ignored rather than corrupting state.answers order.
+    if (answerParam && answerParam.questionIndex === IQLY.state.getAnswers().length) {
+      IQLY.state.recordAnswer(answerParam.answerIndex);
+      IQLY.track('question_answered', {
+        questionIndex: answerParam.questionIndex + 1,
+        source: 'creative_deep_link',
+      });
+      IQLY.state.advance();
+    }
   }
 
   IQLY.render.mount();

@@ -275,6 +275,22 @@ IQLY.screens = {
     );
   },
 
+  // Rendered directly by render.js's handleEmailSubmit() between the email
+  // submit click and the result mount — not a state.js screen (email
+  // submission doesn't change what "current screen" means to the resolver,
+  // it's a brief in-place transition), so it's never reached via mount()
+  // or persisted. Same spinner + single-message shape as `analyzing`.
+  processingResult: function () {
+    var copy = IQLY.CONFIG.copy.processingResult;
+
+    return (
+      '<div class="screen screen-processing-result">' +
+        '<div class="spinner" aria-hidden="true"></div>' +
+        '<p class="processing-message">' + escapeHtml(copy.message) + '</p>' +
+      '</div>'
+    );
+  },
+
   partialResult: function () {
     var copy = IQLY.CONFIG.copy.partialResult;
     var gateCopy = IQLY.CONFIG.copy.emailGate;

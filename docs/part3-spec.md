@@ -49,7 +49,7 @@ content — the space (~16,000px², realistically ~170px of text width
 after mark and button) does not support it.
 
 **Hypothesis**: at this size, a clear promise + low-cost signal
-("Free · 3 min") converts attention into a click better than any
+("Free · 2 min") converts attention into a click better than any
 attempt at a hook, because there is no room to build one properly.
 
 **Implementation notes**:
@@ -114,9 +114,9 @@ ad and the product make the same claim in the same language.
   match with the search term the visitor just typed. Confirmed
   missing from the first build — the other two creatives both open
   with "What's your IQ?"; this one was the outlier and needs the same
-  anchor. Time claim stays "3 min" (or "3-Min"), matching the entry
-  screen's existing "about 3 minutes" claim, phrased as a stated fact
-  rather than a hedge ("about") — e.g. "Take a 3-Min IQ Test." A
+  anchor. Time claim stays "2 min" (or "2-Min"), matching the entry
+  screen's existing "about 2 minutes" claim, phrased as a stated fact
+  rather than a hedge ("about") — e.g. "Take a 2-Min IQ Test." A
   shorter claim (e.g. "1 min") is explicitly rejected: the quiz is 8
   questions plus an analyzing/result sequence, and promising a
   shorter time than the app delivers is the same trust failure the
@@ -223,11 +223,11 @@ deliverable.
   - `.challenge-tag` ("Think you can solve it?") is the only other
     line before the question card — headline+badge, then the
     challenge, then the puzzle. Two visual steps, not three-plus.
-  - The old subheadline's remaining claims ("about 3 minutes", "no
+  - The old subheadline's remaining claims ("about 2 minutes", "no
     signup to start") move down into the existing bottom `microcopy`
     line, merged with the honest tap-explainer already there — this
     adds no new line, it consolidates into one that already exists:
-    "About 3 min · No signup to start · Tap anywhere to jump straight
+    "About 2 min · No signup to start · Tap anywhere to jump straight
     into the quiz."
   Ad copy hierarchy, final: headline+free-badge (brand/keyword/cost,
   one row) → challenge-tag (desire, right before the puzzle) →
@@ -299,7 +299,7 @@ deliverable.
       actual size, not zoomed; confirm CTA is a styled `<span>`, not
       a `<button>` nested inside the wrapping `<a>`
 - [ ] Creative 2: self-insight headline + "IQ Test"-anchored subline
-      ("Take a 3-Min IQ Test", not a hedge like "about 3 minutes" and
+      ("Take a 2-min IQ Test", not a hedge like "about 2 minutes" and
       not a shorter claim like "1 min") + "Try Free" CTA, text only
       (no icon row, no pattern graphic)
 - [ ] Creative 3 — Build A: `main.js` reads `skip=entry`, lands user

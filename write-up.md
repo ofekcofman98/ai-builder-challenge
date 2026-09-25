@@ -116,7 +116,7 @@ presentation one.
 
 ### 1. Entry Screen
 - Headline: value proposition ("Discover your IQ score")
-- Subheadline: "Free · ~3 minutes" (time claim matched to actual
+- Subheadline: "Free · ~2 minutes" (time claim matched to actual
   flow length, including feedback/loading screens)
 - Minimal trust cue: methodology reference + privacy note
   (no fabricated social proof — product has no user history yet)

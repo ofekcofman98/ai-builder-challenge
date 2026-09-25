@@ -16,6 +16,14 @@ var IQLY = window.IQLY || {};
 
 (function () {
 
+  // Every mount replaces #app's innerHTML wholesale (screens.js renders full
+  // HTML strings, not diffs), so .progress-fill is a brand-new DOM node each
+  // time with its target width already baked into the initial markup — the
+  // CSS width transition (components.css) has no "before" state to animate
+  // from and silently no-ops. Track the last-rendered percent here so the
+  // fresh node can be snapped back to it and animated forward on each mount.
+  var lastProgressPercent = 0;
+
   var toastTimer = null;
   // The mid-quiz percentile toast (see handleAnswer) fires just before
   // advancing to the NEXT question, so its message is queued here and
@@ -67,6 +75,18 @@ var IQLY = window.IQLY || {};
       IQLY.state.advance();
       mount();
     }, cfg.steps.length * cfg.stepDurationMs);
+  }
+
+  // Saves the resumable quiz snapshot on every mount, or clears it once the
+  // flow reaches a point the persistence spec says should never resume
+  // (full result reveal / post-account-creation) — one place for this
+  // rather than duplicating save/clear calls in every handler above.
+  function syncPersistence(screenName) {
+    if (screenName === 'fullResult' || screenName === 'upsell') {
+      IQLY.persistence.clear();
+    } else {
+      IQLY.persistence.save(IQLY.state.getSnapshot());
+    }
   }
 
   function trackScreenView(screenName) {
@@ -131,8 +151,19 @@ var IQLY = window.IQLY || {};
     // panel and localStorage are still "as if going live" instrumentation,
     // not a place to also stash PII.
     IQLY.track('account_created', { hasEmail: true });
-    IQLY.state.advance();
-    mount();
+
+    // Brief, honest processing state before the result reveal — mirrors
+    // runAnalyzingSequence()'s pattern (render.js owns the timing, not a
+    // state.js screen) rather than jumping straight to the result, which
+    // read as if the submit hadn't done anything (docs/fixes.md item 3).
+    var appEl = document.getElementById('app');
+    appEl.innerHTML = IQLY.screens.processingResult();
+    IQLY.track('screen_view', { screen: 'processingResult' });
+
+    setTimeout(function () {
+      IQLY.state.advance();
+      mount();
+    }, IQLY.CONFIG.processingResult.durationMs);
   }
 
   function handleShare() {
@@ -202,6 +233,26 @@ var IQLY = window.IQLY || {};
     handleEmailSubmit();
   }
 
+  function animateProgressBar() {
+    var fillEl = document.querySelector('.progress-fill');
+    if (!fillEl) return;
+
+    var targetPercent = IQLY.state.getProgressPercent();
+    fillEl.style.width = lastProgressPercent + '%';
+    lastProgressPercent = targetPercent;
+
+    // A single reflow isn't enough here: this node was never painted at the
+    // "before" width (it's brand new from the innerHTML swap above), so the
+    // browser coalesces both style writes into one paint and skips the
+    // transition. Deferring the target write two frames out gives the
+    // browser an actual committed paint of the start state to animate from.
+    requestAnimationFrame(function () {
+      requestAnimationFrame(function () {
+        fillEl.style.width = targetPercent + '%';
+      });
+    });
+  }
+
   function mount() {
     var screenName = IQLY.state.getCurrentScreen();
     var renderFn = IQLY.screens[screenName];
@@ -214,6 +265,8 @@ var IQLY = window.IQLY || {};
 
     appEl.innerHTML = renderFn();
     trackScreenView(screenName);
+    syncPersistence(screenName);
+    animateProgressBar();
 
     if (screenName === 'analyzing') {
       runAnalyzingSequence();

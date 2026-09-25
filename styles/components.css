@@ -434,6 +434,18 @@
   font-weight: var(--font-weight-medium);
 }
 
+/* Post-email processing screen — same spinner-centered layout as
+   .screen-analyzing, brief single-message variant (docs/fixes.md item 3). */
+.screen-processing-result {
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.processing-message {
+  color: var(--color-text-muted);
+}
+
 /* Partial result — curiosity gap: score obscured, standout strength
    dominant, trust badge sits directly above the CTA (write-up.md: not at
    the top, not only at the end). */

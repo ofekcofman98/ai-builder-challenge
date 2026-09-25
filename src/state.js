@@ -207,6 +207,52 @@ IQLY.state = (function () {
     activeQuestions = null;
   }
 
+  // Plain-object copy of current, for persistence.js to write to
+  // localStorage — state.js still never touches localStorage/DOM itself,
+  // it only hands over the data.
+  function getSnapshot() {
+    return {
+      screen: current.screen,
+      answers: current.answers.slice(),
+      softEntryAnswer: current.softEntryAnswer,
+      emailCaptured: current.emailCaptured,
+    };
+  }
+
+  var KNOWN_SCREENS = ['entry', 'quiz', 'emailGate', 'analyzing', 'partialResult', 'fullResult', 'upsell'];
+
+  // A saved snapshot is only ever resumable mid-flow — never past account
+  // creation or a full result reveal, per the persistence spec, so both
+  // conditions are rejected here even though render.js also never persists
+  // a snapshot in that state (defense against a stale/hand-edited record).
+  function isValidSnapshot(snapshot) {
+    if (!snapshot || typeof snapshot !== 'object') return false;
+    if (KNOWN_SCREENS.indexOf(snapshot.screen) === -1) return false;
+    if (snapshot.screen === 'fullResult' || snapshot.screen === 'upsell') return false;
+    if (typeof snapshot.emailCaptured !== 'boolean' || snapshot.emailCaptured) return false;
+    if (!Array.isArray(snapshot.answers)) return false;
+    if (snapshot.answers.length > questionCount()) return false;
+    if (snapshot.answers.some(function (a) { return typeof a !== 'number'; })) return false;
+    if (snapshot.softEntryAnswer !== null && typeof snapshot.softEntryAnswer !== 'string') return false;
+    return true;
+  }
+
+  // Fails safe: an invalid/malformed snapshot is ignored (current stays at
+  // its default fresh-start value) rather than throwing or partially
+  // applying it. Returns whether the restore actually happened, so
+  // main.js knows whether to skip its other entry-point handling.
+  function restoreSnapshot(snapshot) {
+    if (!isValidSnapshot(snapshot)) return false;
+    current = {
+      screen: snapshot.screen,
+      answers: snapshot.answers.slice(),
+      softEntryAnswer: snapshot.softEntryAnswer,
+      emailCaptured: snapshot.emailCaptured,
+    };
+    activeQuestions = null;
+    return true;
+  }
+
   return {
     getCurrentScreen: getCurrentScreen,
     getCurrentQuestion: getCurrentQuestion,
@@ -222,6 +268,8 @@ IQLY.state = (function () {
     getResult: getResult,
     getAnswers: getAnswers,
     reset: reset,
+    getSnapshot: getSnapshot,
+    restoreSnapshot: restoreSnapshot,
   };
 })();
 

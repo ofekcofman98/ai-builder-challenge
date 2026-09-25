@@ -15,9 +15,9 @@ itself doesn't deliver.
 At this size there's room for roughly three or four words alongside
 the mark and CTA, so the copy carries only what actually moves a
 click: the value claim ("What's your IQ?") and the cost/time signal
-("Free · 3 min"), with a real button for affordance even though the
+("Free · 2 min"), with a real button for affordance even though the
 whole banner is one clickthrough. The time claim matches the entry
-screen's own "about 3 minutes" rather than promising something
+screen's own "about 2 minutes" rather than promising something
 shorter — a banner that overpromises speed just moves the trust
 failure from first load to mid-quiz instead of removing it.
 
