@@ -46,23 +46,27 @@
 
   /* Copy budget: mark stands alone (no text wordmark) — the ~170px of
      remaining width goes entirely to the value claim + CTA, per
-     part3-spec.md's call to pick one, not fit both at full size. */
+     part3-spec.md's call to pick one, not fit both at full size.
+     "Free" moved off the claim and into the CTA label ("Try Free") —
+     it's the strongest lever on CVR, so it belongs in the button people
+     tap, not in a muted sub-line next to it. */
   .claim {
     font-family: var(--font-heading);
-    font-size: 12px;
-    font-weight: var(--font-weight-medium);
-    line-height: 1.15;
+    font-size: 15px;
+    font-weight: var(--font-weight-bold);
+    line-height: 1.1;
     color: var(--color-text);
   }
   .claim .sub {
     display: block;
+    margin-top: 2px;
     font-size: 10px;
     font-weight: var(--font-weight-regular);
     color: var(--color-text-muted);
   }
 
   .cta-cell {
-    width: 56px;
+    width: 74px;
     padding-right: 8px;
     text-align: right;
   }
@@ -80,10 +84,11 @@
     font-family: var(--font-family);
     font-size: 12px;
     font-weight: var(--font-weight-bold);
-    padding: 0 10px;
+    padding: 0 8px;
     height: 32px;
     line-height: 32px;
     border-radius: var(--radius-sm);
+    white-space: nowrap;
   }
 </style>
 </head>
@@ -98,10 +103,10 @@
     </span>
     <span class="cell claim">
       What's your IQ?
-      <span class="sub">Free · 2 min</span>
+      <span class="sub">2 min quiz</span>
     </span>
     <span class="cell cta-cell">
-      <span class="cta">Start</span>
+      <span class="cta">Try Free</span>
     </span>
   </a>
 </body>
