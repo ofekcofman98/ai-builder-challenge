@@ -274,8 +274,15 @@
   font-size: var(--font-size-xxl);
 }
 
-.entry-icon {
+/* Hero-sized brand lockup modifier (see .brand-row below) — bigger gap
+   and wordmark to match the 48px icon size the entry screen passes in. */
+.brand-row-hero {
+  gap: var(--space-2);
   margin-bottom: var(--space-1);
+}
+
+.brand-row-hero .brand-wordmark {
+  font-size: var(--font-size-xxl);
 }
 
 .entry-question-card {
@@ -332,14 +339,28 @@
   justify-content: space-between;
 }
 
-/* Brand mark's own row, top-left of the quiz screen, above the progress
-   bar and everything else — not sharing a line with "Question X of Y". */
-.quiz-brand {
+/* Brand mark lockup — icon + wordmark as one tight unit (small gap,
+   centered baseline) instead of two unrelated elements. Shared by every
+   screen (screens.js's brandMark()): centered/large on the entry hero
+   (.brand-row-hero above), top-left/small everywhere from the quiz
+   screen onward, above the progress bar and everything else — never
+   sharing a line with "Question X of Y" or a screen's own heading. */
+.brand-row {
   display: flex;
+  align-items: center;
+  gap: var(--space-1);
 }
 
-.quiz-logo {
+.brand-logo {
   flex-shrink: 0;
+}
+
+.brand-wordmark {
+  font-family: var(--font-heading);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text);
+  line-height: 1;
 }
 
 /* Reserves consistent vertical space regardless of prompt length or

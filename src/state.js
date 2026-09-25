@@ -32,6 +32,20 @@ IQLY.state = (function () {
     emailCaptured: false,
   };
 
+  // Set once, before the first render, only for the ad creative's
+  // per-answer deep link (?qN=<index>, creative-1080x1920-interactive.html
+  // Build B — see src/main.js's readAnswerParam()). That link lands the
+  // user straight on Q2 (Q1 already answered in the ad) via skipToQuiz(),
+  // which bypasses the 'entry' screen entirely — and q0 (age range) lives
+  // ON that screen, so skipping it silently drops q0 for every deep-link
+  // entrant instead of just reordering it. This flag tells
+  // resolveNextScreen() to route back through 'entry' once the quiz
+  // itself is done, asking q0 there instead of never asking it. Do NOT
+  // remove this branch to "simplify" the deep-link path back to a plain
+  // skip — that reintroduces the silent data loss (docs/creative-fixes.md
+  // item 3a; the normal, no-deep-link flow is untouched by this flag).
+  var deferSoftEntry = false;
+
   function questionCount() {
     return IQLY.CONFIG.flow.questionCount;
   }
@@ -76,7 +90,15 @@ IQLY.state = (function () {
   function resolveNextScreen() {
     switch (current.screen) {
       case 'entry':
-        return 'quiz';
+        // Normal flow: 'entry' is the very first screen, q0 hasn't been
+        // answered yet, and the quiz itself hasn't started — go start it.
+        // Deferred flow (deferSoftEntry): 'entry' is reached a second
+        // time, AFTER the quiz already finished (see 'quiz' case below),
+        // specifically to ask q0 here. Distinguishing the two cases by
+        // "is the quiz already done" rather than by the flag directly
+        // keeps this switch a pure function of `current`+CONFIG either way.
+        if (questionsRemain()) return 'quiz';
+        return 'analyzing';
 
       case 'quiz':
         // Only a mid-quiz threshold interrupts the quiz itself — a
@@ -84,6 +106,10 @@ IQLY.state = (function () {
         // reveal, via CONFIG.emailGate.position (see 'analyzing' below).
         if (isGateDueNow() && isMidQuizGate()) return 'emailGate';
         if (questionsRemain()) return 'quiz';
+        // Deep-link entrants (deferSoftEntry) never got asked q0 up front
+        // — route back through 'entry' once now that the quiz is done,
+        // instead of dropping it (docs/creative-fixes.md item 3a).
+        if (deferSoftEntry && current.softEntryAnswer === null) return 'entry';
         return 'analyzing';
 
       case 'emailGate':
@@ -154,6 +180,13 @@ IQLY.state = (function () {
     current.screen = 'quiz';
   }
 
+  // Companion to skipToQuiz() for the per-answer deep link specifically
+  // (see the deferSoftEntry declaration above for the full why). Only
+  // valid before the first mount, same as skipToQuiz().
+  function setDeferSoftEntry(value) {
+    deferSoftEntry = value;
+  }
+
   // upsell is a user-chosen detour off the resolver's forward-only path,
   // not a CONFIG-driven branch — it's reached from fullResult by explicit
   // click and left the same way, so it's a direct jump rather than
@@ -205,6 +238,7 @@ IQLY.state = (function () {
       emailCaptured: false,
     };
     activeQuestions = null;
+    deferSoftEntry = false;
   }
 
   // Plain-object copy of current, for persistence.js to write to
@@ -261,6 +295,7 @@ IQLY.state = (function () {
     recordEmail: recordEmail,
     advance: advance,
     skipToQuiz: skipToQuiz,
+    setDeferSoftEntry: setDeferSoftEntry,
     viewUpsell: viewUpsell,
     dismissUpsell: dismissUpsell,
     getProgressPercent: getProgressPercent,

@@ -20,6 +20,165 @@ Entry format:
 
 ---
 
+## 2026-09-25 — Full logo on every screen: entry hero gets a wordmark, after-quiz screens get the lockup
+
+**Decision:** two more follow-ups to the brand mark work above, per user review:
+
+1. The entry screen previously showed the icon alone (`.entry-icon`) above the headline —
+   the wordmark existed on the quiz header but not here, the screen users see first.
+   Replaced with the same lockup, larger (48px icon, `.brand-row-hero` modifier sizes the
+   wordmark up to match).
+2. `analyzing`, `processingResult`, `partialResult`, `emailGate`, `fullResult`, and
+   `upsell` previously showed no brand mark at all — only the quiz screen had one. Added
+   the same 24px lockup, top-left, to all six, so the brand stays visible start to finish
+   instead of disappearing once the quiz ends.
+
+Refactored the duplicated icon+wordmark markup (quiz header had it inline) into one
+`brandMark(size, extraClass)` helper in `screens.js`, and renamed the CSS from
+`.quiz-brand`/`.quiz-logo`/`.quiz-wordmark` to `.brand-row`/`.brand-logo`/
+`.brand-wordmark` — those classes are no longer quiz-specific, so the quiz-only names
+would have been misleading to the next person reading the CSS.
+
+**Why:** a logo that appears on one screen out of eight isn't a consistent brand
+presence — the goal (docs/AI_WORKFLOW.md's earlier quiz-header entry) was continuity
+through the whole flow, which the first pass only half-delivered.
+
+**AI's role:** Claude made both changes directly on the user's report and verified
+every screen live (browser screenshots of entry, partialResult, fullResult, and upsell;
+the shared helper guarantees analyzing/processingResult/emailGate render identically
+since they call the same function).
+
+---
+
+## 2026-09-25 — Brand mark follow-up: bigger 320×50 icon, wordmark added to quiz header
+
+**Decision:** two direct fixes to the brain-icon swap above, per user review of the live
+result:
+
+1. `creative-320x50.html`'s mark grew back from 20px to 26px (cell 30px→34px) — it read
+   as a bare sliver next to the full-size marks used everywhere else in the flow. Claim
+   text area shrank from ~170px to ~166px; re-exported and confirmed no wrapping/clipping.
+2. The quiz header (`.quiz-brand` in `screens.js`'s `quiz()`) previously rendered the
+   icon alone, with no wordmark — unlike the creatives, which all pair the mark with
+   "IQly" text. Added a `.quiz-wordmark` span next to `logoMark()`, tight `gap` via
+   `--space-1`, so the two read as one lockup instead of an unlabeled icon floating
+   top-left. The brand name itself moved into `CONFIG.brand.name` rather than a literal
+   in `screens.js`, per this repo's no-magic-strings rule.
+
+**Why:** both were legibility/recognition gaps the icon swap introduced — the 320×50 mark
+lost visual weight it had before, and the quiz header lost the brand-name text that the
+creatives all carry, leaving the icon to identify the product on its own mid-quiz.
+
+**AI's role:** Claude made both fixes directly on the user's report, verified the 320×50
+change with a re-export (checked for text wrapping) and the quiz-header change with a
+live screenshot of the actual quiz screen (not just the entry hero).
+
+---
+
+## 2026-09-25 — Brand mark swap: abstract geometric mark → brain icon
+
+**Decision:** replaced `logoMark()`'s SVG (`src/screens.js`) — the abstract
+circle/rect/triangle mark used across the live quiz (entry hero, quiz header)
+and all 3 ad creatives — with a two-lobe brain glyph (blob silhouette + single
+bold center seam, no interior fold detail). Propagated the identical SVG,
+bound to the same `var(--color-primary)` / `var(--color-bg)` tokens, to
+`creative-320x50.html`, `creative-250x250.html`, `creative-1080x1920.html`,
+and `creative-1080x1920-interactive.html` — one mark, no creative-only
+variant. Re-exported all 3 creative PNGs after the swap was in place
+everywhere.
+
+**Considered:** keeping the abstract mark and only producing the brain icon
+as a separate marketing/brand asset (not wired into the product). Rejected
+per explicit user instruction — this was a full swap, not an additional
+asset.
+
+**Why:** a brain reads as an immediate, literal signal of "intelligence
+test" at a glance; the abstract shapes only meant something next to the
+wordmark. This explicitly **reverses** Part 1's documented mark-choice
+stance (`write-up.md`'s original "no illustrated mascots" note, which the
+old `logoMark()` comment cited as its rationale) — but that stance was
+about ruling out personified/cartoon figures, not flat geometric symbols
+generally, so a single-color brain glyph with no character still fits it.
+`write-up.md` was updated in place to state this explicitly rather than
+leave the old reasoning describing a mark that no longer exists.
+
+Legibility was checked before wiring in, not after: rendered the candidate
+icon at 20px (the actual rendered size in `creative-320x50.html` — the CSS
+override on `.mark svg`, not the `28` SVG attribute, wins), 22px
+(`creative-250x250.html`), 24px (live quiz header, `CONFIG.quiz.showLogo`),
+48px (entry hero), and 60px (`creative-1080x1920*`). An earlier draft with
+4 short interior fold lines (matching the artifact-exploration version)
+smeared into a solid blob below ~30px; the shipped version drops that detail
+and keeps only the bold center seam, which stays legible at every size
+checked.
+
+**AI's role:** Claude proposed the icon design (in a separate Artifact
+exploration, not wired into the product), then on explicit user instruction
+executed the full swap: code change, the small-size legibility pass and
+resulting simplification, propagation to all 4 creative files, the
+`write-up.md` reasoning update, and the PNG re-export. The decision to
+reverse the "no mascot" call and do a full swap (rather than a side-by-side
+asset) was the user's.
+
+---
+
+## 2026-09-25 — Creative Round 4 fixes (`docs/creative-fixes.md`): "2 min" consistency, Creative 1/2 legibility, Build B deep-link soft-entry deferral
+
+**Decision:** implemented items 0–3 from `docs/creative-fixes.md`, one at a time with a
+stop for review after each:
+
+0. **"2 min" consistency** — the doc's premise (entry subheadline says "about 3 minutes")
+   didn't match the actual file: `config.js` already said "about 2 minutes," so no
+   ad-vs-entry-screen contradiction existed. Tightened the exact wording anyway, from
+   "Free · about 2 minutes" to "Free · 2 min," to match the ad creatives' phrasing
+   verbatim rather than just directionally. Question count (8 scored + 1 age question,
+   ~12–15s each) is plausibly grounded for a "2 min" claim — not flagged back.
+1. **Creative 2 (250×250) hierarchy** — headline 19→23px, subline 12→15px bold
+   full-contrast (was 12px muted gray). Verified via `creatives/export.js` PNG render at
+   actual 250×250: fits cleanly, no clipping.
+2. **Creative 1 (320×50) CTA/subline legibility** — mark shrunk 40→30px width (first
+   candidate to give room, per the doc's explicit priority order) to make space; CTA
+   button widened 74→116px (widened twice — once to 96px, then further per direct
+   follow-up request once the render showed remaining free space) with 15px bold text;
+   subline enlarged 10px muted →12px bold full-contrast. Verified via PNG render at
+   actual 320×50.
+3a. **Build B deep-link soft-entry deferral** — the per-answer deep link
+   (`?q1=<index>`) landed straight on Q2 via `state.skipToQuiz()`, which bypasses the
+   `entry` screen entirely — and q0 (age range) lives on that screen, so it was silently
+   never asked for this entry path. Added `state.deferSoftEntry` (set from `main.js` only
+   when `answerParam` is present, not for a plain `?skip=entry`), and branched
+   `resolveNextScreen()`'s `quiz`/`entry` cases so a deferred entrant is routed back
+   through `entry` (asking q0) once the quiz itself is done, before `analyzing`, instead
+   of skipping it. Verified end-to-end in-browser: deep link → Q2...Q8 → q0 → analyzing;
+   separately confirmed the normal (no-param) flow is unaffected: q0 still asks first,
+   then Q1...Q8.
+3b. **Build B CTA wording** — confirmed the "large CTA button" the doc referred to is
+   `.cta-banner`, the *fallback* link for a viewer who doesn't tap a specific option
+   (`?skip=entry`, no answer submitted) — not the per-option taps themselves, which carry
+   no separate CTA label. Per the doc's own conditional, that initially meant keeping the
+   fallback consistent with Build A ("Start the quiz"), and it was set to that first —
+   then changed to "Next Question →" per explicit user direction overriding that reading,
+   so a viewer who taps anywhere (not just a specific option tile) still gets a CTA that
+   reads as continuing the quiz already on screen, rather than "starting" one they're
+   already inside.
+
+**Considered:** for 3a, an alternative was accepting Build B stays "q1-only-in-spirit" and
+leaving q0 dropped for deep-link entrants (silent data loss in an age-normed scoring
+field) — rejected per the doc's explicit instruction to defer rather than drop.
+
+**Why:** age is genuinely used for age-normed scoring context (see `questions.js`'s
+comment on `SOFT_ENTRY_QUESTION`), so losing it for an entire acquisition channel (the ad
+deep link) would quietly bias that channel's scoring data with no visible symptom.
+
+**AI's role:** Claude read the existing `main.js`/`state.js`/`questions.js` flow, proposed
+the `deferSoftEntry` flag + resolver-branch approach (reusing "is the quiz already done"
+as the distinguishing condition rather than threading the flag through every case), and
+verified the fix by walking both the deep-link and normal flows end-to-end in a browser
+rather than just reading the branch logic. The user directed the button-widening follow-up
+in item 2 after reviewing the rendered PNG.
+
+---
+
 ## 2026-09-25 — Final polish pass (`docs/fixes.md`): progress-bar animation bug, refresh persistence, post-email pacing, locked category report
 
 **Decision:** implemented all 4 items from `docs/fixes.md`, one at a time with a stop for

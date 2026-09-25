@@ -196,9 +196,8 @@
       <div class="header">
         <span class="mark">
           <svg viewBox="0 0 64 64" aria-hidden="true">
-            <circle cx="24" cy="24" r="14" fill="var(--color-primary)" opacity="0.85"/>
-            <rect x="30" y="30" width="24" height="24" rx="4" fill="var(--color-primary)" opacity="0.55"/>
-            <polygon points="16,52 28,52 22,40" fill="var(--color-primary)" opacity="0.7"/>
+            <path d="M32 6 C21 6 15 13 17 21 C8 23 6 33 15 37 C13 45 21 53 30 51 C31 56 33 56 34 51 C43 53 51 45 49 37 C58 33 56 23 47 21 C49 13 43 6 32 6 Z" fill="var(--color-primary)"/>
+            <path d="M32 9 C30.5 20 30.5 44 32 53" stroke="var(--color-bg)" stroke-width="5" stroke-linecap="round"/>
           </svg>
         </span>
         <span class="wordmark">IQly</span>
@@ -217,10 +216,16 @@
         <table class="option-grid-table" role="presentation" id="option-grid"></table>
       </div>
 
-      <!-- Fallback for a viewer who taps outside an answer: still lands
-           on Q1 directly (Build A's mechanism), just without a pre-filled
-           answer. -->
-      <a class="cta-banner" href="../index.html?skip=entry" target="_top">Or jump to the quiz &rarr;</a>
+      <!-- Fallback for a viewer who taps outside an answer: lands on
+           ?skip=entry, same as Build A, with no answer pre-filled. Doc's
+           own conditional (docs/creative-fixes.md item 3b) argued for
+           keeping this "Start the quiz" since no question is actually
+           answered through this path — overridden per explicit user
+           direction to use "Next Question" here instead, so a viewer who
+           taps anywhere (not just a specific option) still reads the CTA
+           as continuing the quiz they're already looking at, consistent
+           with the per-option taps' own behavior. -->
+      <a class="cta-banner" href="../index.html?skip=entry" target="_top">Next Question &rarr;</a>
       <p class="microcopy">Tap an answer to submit it and continue instantly</p>
     </div>
   </div>

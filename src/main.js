@@ -53,6 +53,15 @@ IQLY.init = function () {
       IQLY.track('quiz_started', { source: 'creative_deep_link' });
     }
 
+    // Only the per-answer deep link (?qN=<index>) needs q0 deferred — it
+    // lands past 'entry' with an answer already recorded, so q0 has to be
+    // asked later instead of never. A plain ?skip=entry (Build A, no
+    // answer) intentionally skips q0 the same way it always has — not
+    // this file's concern to change (docs/creative-fixes.md item 3a).
+    if (answerParam) {
+      IQLY.state.setDeferSoftEntry(true);
+    }
+
     // Only honored when it targets the next unanswered question — a stale
     // or malformed link (wrong index, or the quiz already moved on) is
     // ignored rather than corrupting state.answers order.

@@ -72,20 +72,37 @@ function shapeOptionButton(action, index, label, iconSvg) {
   '</button>';
 }
 
-// Inline-SVG mark — three overlapping shapes, echoing the pattern-
-// recognition question type without being a mascot (write-up.md rules
-// those out). Inline, no asset file, no CDN. Shared by the entry hero
-// (large) and the quiz header's persistent brand mark (small, see
+// Inline-SVG mark — a two-lobe brain glyph (silhouette + single center
+// seam), replacing the earlier abstract circle/rect/triangle mark
+// (see docs/AI_WORKFLOW.md's 2026-09-25 entry for why). Deliberately
+// reduced to one bold seam line and no interior fold detail: this is
+// the version that survives being rendered at 20px (creative-320x50's
+// banner mark) without collapsing into a smudge — checked at 20/22/24/
+// 48/60px before wiring in, not approved off the large export alone.
+// Inline, no asset file, no CDN. Shared by the entry hero (large) and
+// the quiz header's persistent brand mark (small, see
 // CONFIG.quiz.showLogo) — same SVG, sized/classed per call site so a
 // single source stays the one place this mark is drawn.
 function logoMark(size, extraClass) {
   return (
     '<svg class="logo-mark' + (extraClass ? ' ' + extraClass : '') +
       '" viewBox="0 0 64 64" width="' + size + '" height="' + size + '" aria-hidden="true">' +
-      '<circle cx="24" cy="24" r="14" fill="var(--color-primary)" opacity="0.85"/>' +
-      '<rect x="30" y="30" width="24" height="24" rx="4" fill="var(--color-primary)" opacity="0.55"/>' +
-      '<polygon points="16,52 28,52 22,40" fill="var(--color-primary)" opacity="0.7"/>' +
+      '<path d="M32 6 C21 6 15 13 17 21 C8 23 6 33 15 37 C13 45 21 53 30 51 C31 56 33 56 34 51 C43 53 51 45 49 37 C58 33 56 23 47 21 C49 13 43 6 32 6 Z" fill="var(--color-primary)"/>' +
+      '<path d="M32 9 C30.5 20 30.5 44 32 53" stroke="var(--color-bg)" stroke-width="5" stroke-linecap="round"/>' +
     '</svg>'
+  );
+}
+
+// Icon + wordmark lockup shared by every screen that shows the brand: the
+// entry hero (large, centered) and every screen from the quiz onward
+// (small, top-left) — one helper so the pairing/gap is defined once
+// (.brand-row in components.css) instead of re-built per call site.
+function brandMark(size, extraClass) {
+  return (
+    '<div class="brand-row' + (extraClass ? ' ' + extraClass : '') + '">' +
+      logoMark(size, 'brand-logo') +
+      '<span class="brand-wordmark">' + escapeHtml(IQLY.CONFIG.brand.name) + '</span>' +
+    '</div>'
   );
 }
 
@@ -273,7 +290,7 @@ IQLY.screens = {
       // quiz screen onward instead (state.getProgressPercent()).
       '<div class="screen screen-entry">' +
         '<div class="entry-hero">' +
-          logoMark(48, 'entry-icon') +
+          brandMark(48, 'brand-row-hero') +
           '<h1>' + escapeHtml(copy.headline) + '</h1>' +
           '<p class="text-muted">' + escapeHtml(copy.subheadline) + '</p>' +
           '<p class="text-muted trust-cue">' + escapeHtml(copy.trustCue) + '</p>' +
@@ -335,8 +352,9 @@ IQLY.screens = {
         // quiz (previously only shown on the entry screen, before the quiz
         // screens replace it entirely). Its own row above everything else,
         // including the progress bar, not sharing a line with "Question X
-        // of Y" — top-left of the screen, full stop.
-        '<div class="quiz-brand">' + logoMark(24, 'quiz-logo') + '</div>' +
+        // of Y" — top-left of the screen, full stop. Same brandMark() every
+        // post-entry screen uses, so the lockup is identical start to finish.
+        brandMark(24) +
         progressBar(percent) +
         // Fixed-height slot, always rendered — render.js fills/clears the
         // text and toggles visibility, but the reserved space never
@@ -370,6 +388,7 @@ IQLY.screens = {
 
     return (
       '<div class="screen screen-analyzing">' +
+        brandMark(24) +
         '<div class="spinner" aria-hidden="true"></div>' +
         '<ul class="analyzing-steps">' + stepItems + '</ul>' +
       '</div>'
@@ -386,6 +405,7 @@ IQLY.screens = {
 
     return (
       '<div class="screen screen-processing-result">' +
+        brandMark(24) +
         '<div class="spinner" aria-hidden="true"></div>' +
         '<p class="processing-message">' + escapeHtml(copy.message) + '</p>' +
       '</div>'
@@ -421,6 +441,7 @@ IQLY.screens = {
 
     return (
       '<div class="screen screen-partial-result">' +
+        brandMark(24) +
         '<div class="card standout-card">' +
           '<span class="text-muted">' + escapeHtml(leadLabel) + '</span>' +
           '<h2>' + escapeHtml(leadHeadline) + '</h2>' +
@@ -452,6 +473,7 @@ IQLY.screens = {
 
     return (
       '<div class="screen screen-email-gate">' +
+        brandMark(24) +
         '<div>' +
           '<h1>' + escapeHtml(copy.headline) + '</h1>' +
           '<p class="text-muted">' + escapeHtml(copy.subheadline) + '</p>' +
@@ -483,6 +505,7 @@ IQLY.screens = {
 
     return (
       '<div class="screen screen-full-result">' +
+        brandMark(24) +
         '<div class="card score-card">' +
           '<span class="text-muted">' + escapeHtml(copy.scoreLabel) + '</span>' +
           '<div class="score-value">' + result.score + '</div>' +
@@ -539,6 +562,7 @@ IQLY.screens = {
 
     return (
       '<div class="screen screen-upsell">' +
+        brandMark(24) +
         '<div>' +
           '<h1>' + escapeHtml(copy.headline) + '</h1>' +
           '<p class="text-muted">' + escapeHtml(copy.subheadline) + '</p>' +

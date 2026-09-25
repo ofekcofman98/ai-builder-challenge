@@ -38,13 +38,18 @@
     vertical-align: middle;
   }
 
+  /* Shrunk from 40px/28px so the CTA and subline can grow (docs/creative-fixes.md
+     item 2), then grown back to 34px/26px — the brain mark reads as a bare
+     sliver at 20px next to the full-size marks used everywhere else in the
+     flow, and there's still ~166px of claim room at 34px, which the actual
+     copy comfortably fits (verified by re-export, not assumed). */
   .mark {
-    width: 40px;
-    padding-left: 8px;
+    width: 34px;
+    padding-left: 6px;
   }
-  .mark svg { width: 28px; height: 28px; display: block; }
+  .mark svg { width: 26px; height: 26px; display: block; }
 
-  /* Copy budget: mark stands alone (no text wordmark) — the ~170px of
+  /* Copy budget: mark stands alone (no text wordmark) — the ~166px of
      remaining width goes entirely to the value claim + CTA, per
      part3-spec.md's call to pick one, not fit both at full size.
      "Free" moved off the claim and into the CTA label ("Try Free") —
@@ -57,16 +62,20 @@
     line-height: 1.1;
     color: var(--color-text);
   }
+  /* Bumped from 10px muted-gray to 12px bold full-contrast — illegible at
+     actual rendered size otherwise (docs/creative-fixes.md item 2). */
   .claim .sub {
     display: block;
     margin-top: 2px;
-    font-size: 10px;
-    font-weight: var(--font-weight-regular);
-    color: var(--color-text-muted);
+    font-size: 12px;
+    font-weight: var(--font-weight-bold);
+    color: var(--color-text);
   }
 
+  /* Widened from 74px so the button reads as a real tap target, not a
+     small label with padding around it (docs/creative-fixes.md item 2). */
   .cta-cell {
-    width: 74px;
+    width: 116px;
     padding-right: 8px;
     text-align: right;
   }
@@ -79,14 +88,16 @@
   .cta {
     display: inline-block;
     box-sizing: border-box;
+    width: 100%;
+    text-align: center;
     background: var(--color-primary);
     color: var(--color-primary-contrast);
     font-family: var(--font-family);
-    font-size: 12px;
+    font-size: 15px;
     font-weight: var(--font-weight-bold);
     padding: 0 8px;
-    height: 32px;
-    line-height: 32px;
+    height: 38px;
+    line-height: 38px;
     border-radius: var(--radius-sm);
     white-space: nowrap;
   }
@@ -95,10 +106,9 @@
 <body>
   <a class="banner" href="../index.html" target="_top">
     <span class="cell mark">
-      <svg viewBox="0 0 64 64" width="28" height="28" aria-hidden="true">
-        <circle cx="24" cy="24" r="14" fill="var(--color-primary)" opacity="0.85"/>
-        <rect x="30" y="30" width="24" height="24" rx="4" fill="var(--color-primary)" opacity="0.55"/>
-        <polygon points="16,52 28,52 22,40" fill="var(--color-primary)" opacity="0.7"/>
+      <svg viewBox="0 0 64 64" width="26" height="26" aria-hidden="true">
+        <path d="M32 6 C21 6 15 13 17 21 C8 23 6 33 15 37 C13 45 21 53 30 51 C31 56 33 56 34 51 C43 53 51 45 49 37 C58 33 56 23 47 21 C49 13 43 6 32 6 Z" fill="var(--color-primary)"/>
+        <path d="M32 9 C30.5 20 30.5 44 32 53" stroke="var(--color-bg)" stroke-width="5" stroke-linecap="round"/>
       </svg>
     </span>
     <span class="cell claim">

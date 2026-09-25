@@ -10,6 +10,13 @@
 var IQLY = window.IQLY || {};
 
 IQLY.CONFIG = {
+  // Product name used everywhere the wordmark renders as text (quiz header
+  // brand lockup, etc.) — one place to change it, per this file's own rule
+  // against hardcoded strings.
+  brand: {
+    name: 'IQly',
+  },
+
   flow: {
     // This is the BASE HAPPY PATH ONLY — entry through the result reveal
     // assuming email is never gated mid-quiz. It intentionally does NOT
@@ -89,7 +96,11 @@ IQLY.CONFIG = {
   copy: {
     entry: {
       headline: 'Discover your IQ score',
-      subheadline: 'Free · about 2 minutes',
+      // Exact "2 min" phrasing (not "about 2 minutes") to match the ad
+      // creatives' wording verbatim (docs/creative-fixes.md item 0) — a
+      // visitor who just read "2 min" in the ad shouldn't land on a
+      // softened claim that reads as a different number.
+      subheadline: 'Free · 2 min',
       trustCue: 'Based on established cognitive-testing methodology. We never sell your data.',
     },
     quiz: {

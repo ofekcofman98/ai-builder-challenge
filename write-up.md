@@ -187,6 +187,17 @@ presentation one.
 - Optional: minimalist archetype label (e.g. "The Pattern Seeker"),
   text + icon only — no illustrated mascots, to preserve the
   test's credibility
+- Note on "no mascots": this rules out personified/cartoon figures
+  specifically (a face, a character with arms and an expression) —
+  not single-color geometric or line-art symbols. The site's brand
+  mark (`logoMark()` in `screens.js`) is a two-lobe brain glyph in
+  that same category as its original abstract circle/rect/triangle
+  version: flat, single-color, no character. It replaced the abstract
+  shapes (2026-09-25, see `docs/AI_WORKFLOW.md`) because a brain
+  reads as a direct, immediate signal of "intelligence test" at a
+  glance, where the abstract shapes required the wordmark next to
+  them to mean anything — worth the tradeoff of being a more literal
+  symbol than the original design's deliberately abstract stance
 - Optional: "Share your result" action — generates a shareable
   card. Positioned post-conversion only, as a low-cost acquisition
   loop (K-factor) — out of the core CVR scope but noted in the
