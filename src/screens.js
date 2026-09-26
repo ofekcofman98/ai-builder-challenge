@@ -402,12 +402,16 @@ IQLY.screens = {
   // or persisted. Same spinner + single-message shape as `analyzing`.
   processingResult: function () {
     var copy = IQLY.CONFIG.copy.processingResult;
+    // Mid-quiz submit (Test 1) resumes the quiz, not a result — showing
+    // "Calculating your results..." there would fabricate a processing
+    // step that isn't happening (see config.js messageMidQuiz).
+    var message = IQLY.state.isMidQuizGate() ? copy.messageMidQuiz : copy.message;
 
     return (
       '<div class="screen screen-processing-result">' +
         brandMark(24) +
         '<div class="spinner" aria-hidden="true"></div>' +
-        '<p class="processing-message">' + escapeHtml(copy.message) + '</p>' +
+        '<p class="processing-message">' + escapeHtml(message) + '</p>' +
       '</div>'
     );
   },
@@ -471,12 +475,25 @@ IQLY.screens = {
   emailGate: function () {
     var copy = IQLY.CONFIG.copy.emailGate;
 
-    // Only true mid-quiz (Test 1): a post-quiz gate (full-reveal variant)
-    // has already answered every question, so there's no remaining-effort
-    // claim left to make and this block is skipped rather than shown false.
+    // Config-driven signal (same one state.js's resolver uses to decide
+    // whether this gate interrupts the quiz at all): true only when the
+    // gate threshold sits before the last question (Test 1). A post-quiz
+    // gate (full-reveal variant) has already answered every question, so
+    // there's no remaining-effort claim to make, and submitting there
+    // genuinely does reveal a result — different copy AND a different
+    // post-submit transition (see processingResult()/render.js).
+    var isMidQuiz = IQLY.state.isMidQuizGate();
+    var headline = isMidQuiz ? copy.midQuiz.headline : copy.headline;
+    var subheadline = isMidQuiz ? copy.midQuiz.subheadline : copy.subheadline;
+    // emailForm() only reads emailPlaceholder/invalidEmail/cta off the copy
+    // object it's given — those first two are shared, so only cta needs
+    // overriding here rather than fully duplicating the copy block.
+    var formCopy = isMidQuiz
+      ? { emailPlaceholder: copy.emailPlaceholder, invalidEmail: copy.invalidEmail, cta: copy.midQuiz.cta }
+      : copy;
+
     var answered = IQLY.state.getAnswers().length;
     var total = IQLY.CONFIG.flow.questionCount;
-    var isMidQuiz = answered < total;
 
     var momentum = isMidQuiz
       ? '<div class="gate-momentum">' +
@@ -492,10 +509,10 @@ IQLY.screens = {
       '<div class="screen screen-email-gate">' +
         brandMark(24) +
         '<div class="gate-content">' +
-          '<h1>' + escapeHtml(copy.headline) + '</h1>' +
-          '<p class="text-muted">' + escapeHtml(copy.subheadline) + '</p>' +
+          '<h1>' + escapeHtml(headline) + '</h1>' +
+          '<p class="text-muted">' + escapeHtml(subheadline) + '</p>' +
           momentum +
-          emailForm(copy) +
+          emailForm(formCopy) +
         '</div>' +
       '</div>'
     );

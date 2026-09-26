@@ -20,6 +20,49 @@ Entry format:
 
 ---
 
+## 2026-09-26 — Fix: Variant 1's mid-quiz gate copy/transition falsely implied results existed
+
+**Decision:** `emailGate()` in `screens.js` is shared between two genuinely different
+contexts — the end-of-quiz gate (submitting reveals an already-computed partial result)
+and Variant 1's mid-quiz gate after Q4 (submitting just resumes the quiz at Q5) — but
+both used identical "unlock your results" / "Unlock my results" copy, and both routed
+through the same post-submit "Calculating your results..." transition
+(`processingResult`, added per final-polish-spec.md item #3). Neither claim is true
+mid-quiz: nothing is being unlocked or calculated at Q4. Made both copy and the
+post-submit transition context-aware, driven by the same signal state.js's own screen
+resolver already uses to decide whether the gate interrupts the quiz at all
+(`isMidQuizGate()`, now exposed on the public `IQLY.state` API instead of adding a
+second signal): `copy.emailGate.midQuiz` overrides headline/subheadline/cta for the
+mid-quiz case, and `processingResult()` swaps in `copy.processingResult.messageMidQuiz`
+("Saving...") instead of "Calculating your results..." when `isMidQuizGate()` is true.
+The end-of-quiz path is untouched — same copy, same transition as before.
+
+**Considered:** adding a new explicit `context` parameter threaded through the render
+call. Rejected in favor of reusing `isMidQuizGate()` — it's exactly the same
+mid-quiz-vs-end-of-quiz distinction state.js already computes to route to this screen
+in the first place, so a second signal would just be a duplicate that could drift out of
+sync with it.
+
+**Why:** the mid-quiz gate is a growth mechanic riding on genuine momentum (see the prior
+entry) — the moment its copy claims something untrue (unlocking results that don't
+exist), it undermines the exact credibility the flow spends the whole quiz building, for
+no conversion upside once a user notices the quiz reappearing after "Unlock my results."
+
+**AI's role:** user root-caused the shared-component/two-contexts bug themselves, named
+the fix in full (context-aware copy fields, branch the transition, reuse the existing
+mid-quiz signal rather than inventing one) and asked Claude to confirm the codebase
+exposed that signal cleanly before implementing — it did (`isMidQuizGate()` already
+existed internally, just not on the public API). Claude added `copy.emailGate.midQuiz`
+and `copy.processingResult.messageMidQuiz` to `config.js`, exposed `isMidQuizGate` from
+`state.js`, branched `emailGate()`/`processingResult()` in `screens.js`, and verified via
+a temporary Puppeteer install (removed after) at 375×812 and 1280×800 that: Variant 1's
+gate shows "Enter your email to continue" / "Continue the quiz" / the existing progress +
+reassurance line, its post-submit transition shows "Saving..." and lands back on the quiz
+screen (Q5); and the baseline end-of-quiz gate is byte-for-byte unchanged — "Unlock my
+results," "Calculating your results...," lands on the full result.
+
+---
+
 ## 2026-09-26 — Fix: Variant 1's mid-quiz gate had dead space below the content block
 
 **Decision:** `variant-1-gate-after-q4.html`'s emailGate screen (fires after Q4, before

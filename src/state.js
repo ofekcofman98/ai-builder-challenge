@@ -302,6 +302,7 @@ IQLY.state = (function () {
     getStreak: getStreak,
     getResult: getResult,
     getAnswers: getAnswers,
+    isMidQuizGate: isMidQuizGate,
     reset: reset,
     getSnapshot: getSnapshot,
     restoreSnapshot: restoreSnapshot,

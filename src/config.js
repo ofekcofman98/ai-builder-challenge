@@ -117,6 +117,10 @@ IQLY.CONFIG = {
     },
     processingResult: {
       message: 'Calculating your results...',
+      // Mid-quiz email submit (Test 1) resumes the quiz, not a result — reusing
+      // "Calculating your results..." here would fabricate a processing step
+      // that isn't happening. See render.js handleEmailSubmit().
+      messageMidQuiz: 'Saving...',
     },
     partialResult: {
       standoutLabel: 'Your Standout Strength',
@@ -135,6 +139,8 @@ IQLY.CONFIG = {
       trustBadge: 'Scored using a validated cognitive-assessment methodology',
     },
     emailGate: {
+      // End-of-quiz gate (control/baseline): submitting reveals the
+      // already-computed partial result, so "unlock" framing is accurate.
       headline: "You're one step away from your full results",
       subheadline: 'Enter your email to unlock your score, percentile, and full breakdown.',
       emailPlaceholder: 'you@example.com',
@@ -145,6 +151,16 @@ IQLY.CONFIG = {
       // implying a result — reinforces momentum right where post-gate
       // drop-off is the known risk (write-up.md).
       reassurance: "Just a few more questions, then your full results.",
+      // Mid-quiz override (state.isMidQuizGate()): submitting here returns
+      // the user to the next question, not a result, so headline/subheadline/
+      // cta must not promise an unlock that doesn't exist yet. Overrides only
+      // what actually differs — emailPlaceholder/invalidEmail/reassurance are
+      // shared as-is (see screens.js emailGate()).
+      midQuiz: {
+        headline: 'Enter your email to continue',
+        subheadline: 'Save your email now — you can pick up right where you left off.',
+        cta: 'Continue the quiz',
+      },
     },
     fullResult: {
       scoreLabel: 'Your IQ Score',
