@@ -140,6 +140,11 @@ IQLY.CONFIG = {
       emailPlaceholder: 'you@example.com',
       cta: 'Unlock my results',
       invalidEmail: 'Enter a valid email to continue.',
+      // Mid-quiz gate only (Test 1): no score/percentile exists yet at this
+      // point, so the reassurance names real remaining effort instead of
+      // implying a result — reinforces momentum right where post-gate
+      // drop-off is the known risk (write-up.md).
+      reassurance: "Just a few more questions, then your full results.",
     },
     fullResult: {
       scoreLabel: 'Your IQ Score',

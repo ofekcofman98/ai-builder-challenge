@@ -20,6 +20,56 @@ Entry format:
 
 ---
 
+## 2026-09-26 — Fix: Variant 1's mid-quiz gate had dead space below the content block
+
+**Decision:** `variant-1-gate-after-q4.html`'s emailGate screen (fires after Q4, before
+any score/percentile/curve exists) had its headline/subtext/input/button anchored near
+the top, leaving a large empty gap below at typical phone heights. Fixed two ways: (1)
+`.screen-email-gate` now uses `justify-content: center` so the content block sits in the
+visual middle instead of anchored at the top; (2) added a real progress indicator
+(reusing the existing `progressBar()`/`questionLabel` copy already driving the quiz
+screen) plus a short reassurance line (`copy.emailGate.reassurance`), shown only when
+the gate fires mid-quiz (`answered < questionCount`) — a post-quiz full-reveal gate
+skips this block since there's no "remaining effort" left to reassure about.
+
+**Considered:** filling the space with a fabricated/placeholder score or percentile
+curve. Rejected outright — nothing like that exists yet at Q4, and it would directly
+contradict this project's own rejection of the blurred/locked fake-score treatment on
+the main flow (write-up-part1.md's decision log).
+
+**Why:** the added content is genuinely true at this point in the quiz (real question
+count, real progress), and it doubles as reinforcement for Test 1's own hypothesis —
+momentum right where post-gate drop-off is the known risk (write-up.md).
+
+**AI's role:** user reported the visual bug with the two-part fix spelled out (center
+the block; add one genuinely-true element, no fabricated results) and a preference for
+progress indicator + reassurance line if the codebase's conventions supported it — they
+did (existing `progressBar()`/`questionLabel`/copy.js pattern), so no clarifying question
+was needed. Claude implemented both parts in `config.js`/`screens.js`/`components.css`
+and verified at 375×812, 390×844, and 1280×800 via a temporary `puppeteer` install
+(removed after), confirming the content reads as centered/composed rather than sparse
+and that no score/percentile value is shown at this stage.
+
+---
+
+## 2026-09-25 — Bug fix: email input background matched the page background
+
+**Decision:** `.field input` (styles/components.css) was painted with `var(--color-bg)`
+— the page's own off-white — instead of `var(--color-surface)` (white). Against the
+`--color-bg` page and card background, the field had almost no contrast: just a thin
+`--color-border` outline separating it from the page, easy to miss as an interactive
+element. Changed to `--color-surface`, matching every other card/control on the page.
+
+**Why:** a field a user can't see they can tap isn't just a cosmetic issue on the
+email-gate screen specifically — that's the steepest modeled drop-off in the funnel
+(write-up.md), so anything that makes the field harder to notice works directly against
+it.
+
+**AI's role:** user reported the visual bug; Claude found the one-line cause and fixed
+it, verified live (email-gate screen screenshot, scrolled to the field).
+
+---
+
 ## 2026-09-25 — Full logo on every screen: entry hero gets a wordmark, after-quiz screens get the lockup
 
 **Decision:** two more follow-ups to the brand mark work above, per user review:

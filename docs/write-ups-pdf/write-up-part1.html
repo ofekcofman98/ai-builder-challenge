@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>IQly — Part 1 Write-up</title>
+<link rel="stylesheet" href="../../styles/tokens.css">
+<link rel="stylesheet" href="./pdf.css">
+</head>
+<body>
+
+<header class="doc-header">
+  <div class="brand-lockup">
+    <div class="icon-cell">
+      <svg viewBox="0 0 64 64" aria-hidden="true">
+        <path d="M32 6 C21 6 15 13 17 21 C8 23 6 33 15 37 C13 45 21 53 30 51 C31 56 33 56 34 51 C43 53 51 45 49 37 C58 33 56 23 47 21 C49 13 43 6 32 6 Z" class="icon-fill"/>
+        <path d="M32 9 C30.5 20 30.5 44 32 53" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <div class="word-cell"><span class="wordmark">IQly</span></div>
+  </div>
+  <div class="doc-title">Part 1 — AI Quiz Flow: Write-up</div>
+</header>
+
+<h2>Competitive research</h2>
+<p>I audited 3 sponsored "free iq test" results and 1 top organic result (myiqtested.com) end-to-end as a user. None of the sponsored competitors used a traditional landing page — the first screen was already part of the quiz, and all three injected real-time percentile feedback mid-quiz to sustain engagement. All three asked for email right after the last question, before revealing the result, leveraging peak sunk-cost investment. One showed a price symbol before the quiz even started — an instant trust failure as a test user.</p>
+
+<h2>Funnel model &amp; bottleneck</h2>
+<table>
+  <tr><th>Transition</th><th>Assumed rate</th><th>Basis</th></tr>
+  <tr><td>Page visit → Quiz start</td><td>72%</td><td>Paid-search engagement, lifted by soft-entry design</td></tr>
+  <tr><td>Quiz start → Completion</td><td>65%</td><td>Published quiz-funnel benchmark (80M+ submissions)</td></tr>
+  <tr><td>Completion → Result shown</td><td>92%</td><td>Peak momentum; technical drop-off only</td></tr>
+  <tr><td>Result → Account created</td><td>42%</td><td>Single-field gate (vs. multi-field)</td></tr>
+  <tr><td><strong>Modeled CVR</strong></td><td><strong>~18.1%</strong></td><td></td></tr>
+</table>
+<p><strong>Bottleneck ranking</strong> (impact of a +10pp improvement on overall CVR): Result→Account <strong>+4.3pp</strong> (highest leverage) &gt; Quiz start→Complete +2.8pp &gt; Visit→Quiz start +2.5pp. Every design decision below protects Result→Account specifically — and it's why that step is the first A/B test in Part 2.</p>
+
+<h2>Flow</h2>
+<p>Entry screen with the first quiz question visible (no separate landing/start step) → 8 quiz questions with mid-quiz percentile feedback → labor-illusion loading state → partial result (visual percentile curve, no number) with an inline email field → full result with qualitative category tiers → post-signup upsell teaser.</p>
+
+<h2>Key trade-offs</h2>
+<ol>
+  <li><strong>Combined entry + first question, no landing page.</strong> Removes the Landing→Start drop-off seen across all 3 competitors. Trade-off: less room for trust-building copy before the ask.</li>
+  <li><strong>Email gate is inline on the partial-result screen, not a separate screen/CTA.</strong> Result→Account is the steepest modeled drop-off, so an unearned extra click there fights the funnel's own priority; <code>result_viewed</code> and <code>account_created</code> still fire as distinct events, so step-level measurement isn't lost.</li>
+  <li><strong>Percentile as a visual curve, category scores as qualitative tiers (Strong/Average/Needs practice), not raw numbers.</strong> With 1-2 questions per category, a percentage implies false precision; the curve and tiers convey "where you stand" honestly instead.</li>
+  <li><strong>Zero monetary cues before account creation.</strong> Informed by my own reaction, as a test user, to a competitor showing a price before the quiz started. Trade-off: no upsell surfaced pre-signup at all — deferred to a post-signup teaser screen instead.</li>
+  <li><strong>Fixed-height answer containers and a reserved toast slot.</strong> No layout shift between questions, and the mid-quiz toast can never overlap question content, on any screen size — a mobile fix, since mobile is the weaker half of the funnel (~16.6% vs ~19.6% desktop CVR).</li>
+</ol>
+
+<h2>AI usage</h2>
+<p>I used Claude across three distinct roles, not a single "ask and accept" loop — each with a different level of oversight.</p>
+<p><strong>Research</strong>: Claude ran web searches for published quiz-funnel and paid-search benchmarks (Interact's 80M-submission dataset, Outgrow's single-field-gate findings) anchoring the funnel model above. I directed which claims needed sourcing and cross-checked the figures — the model separates benchmark-sourced numbers from my own estimated adjustments.</p>
+<p><strong>Building</strong>: Claude Code surfaced the <code>file://</code> CORS constraint ruling out ES modules for a no-build flow (unprompted) and proposed the classic-script/namespace pattern used throughout <code>src/</code>. When implementing screens revealed an index-walk state machine couldn't express a mid-quiz email gate (needed for Part 2's Test 1), it proposed a resolver function — which I required it to verify against all 4 planned configs headlessly before accepting, not just demo the happy path.</p>
+<p><strong>Oversight</strong>: every non-trivial decision is logged, dated, with what was considered and why, in <code>AI_WORKFLOW.md</code> — including where I rejected its output. Clearest case: the initial partial-result screen used a blurred/locked exact score as the curiosity hook. I rejected this as a dark pattern (a fake blur reads as manipulative, not curious) and directed a percentile-curve visualization instead — real information honestly revealed, not a fake lock on data that doesn't yet exist.</p>
+
+<footer class="doc-footer">IQly — AI Growth Builder Challenge — Part 1 of 3</footer>
+</body>
+</html>

@@ -471,14 +471,32 @@ IQLY.screens = {
   emailGate: function () {
     var copy = IQLY.CONFIG.copy.emailGate;
 
+    // Only true mid-quiz (Test 1): a post-quiz gate (full-reveal variant)
+    // has already answered every question, so there's no remaining-effort
+    // claim left to make and this block is skipped rather than shown false.
+    var answered = IQLY.state.getAnswers().length;
+    var total = IQLY.CONFIG.flow.questionCount;
+    var isMidQuiz = answered < total;
+
+    var momentum = isMidQuiz
+      ? '<div class="gate-momentum">' +
+          progressBar(IQLY.state.getProgressPercent()) +
+          '<p class="text-muted">' +
+            escapeHtml(formatCopy(IQLY.CONFIG.copy.quiz.questionLabel, { current: answered + 1, total: total })) +
+          '</p>' +
+          '<p class="text-muted">' + escapeHtml(copy.reassurance) + '</p>' +
+        '</div>'
+      : '';
+
     return (
       '<div class="screen screen-email-gate">' +
         brandMark(24) +
-        '<div>' +
+        '<div class="gate-content">' +
           '<h1>' + escapeHtml(copy.headline) + '</h1>' +
           '<p class="text-muted">' + escapeHtml(copy.subheadline) + '</p>' +
+          momentum +
+          emailForm(copy) +
         '</div>' +
-        emailForm(copy) +
       '</div>'
     );
   },

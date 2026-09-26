@@ -104,20 +104,54 @@ function main() {
     fs.writeFileSync(tmpHtmlPath, withoutTokensLink, 'utf8');
     tmpPaths.push(tmpHtmlPath);
 
+    // wkhtmltoimage's Qt WebKit renderer anti-aliases text/edges poorly when
+    // asked to rasterize directly at the final ad-slot size (250x250,
+    // 320x50) — output comes out visibly soft. Rendering at 2x pixel
+    // dimensions via --zoom and then downscaling with high-quality bicubic
+    // resampling (supersampling) fixes this without changing the HTML/CSS
+    // or the final PNG's declared dimensions.
+    const scale = 2;
+    const rawOutPath = path.join(CREATIVES_DIR, '.export-raw-' + creative.out);
     const outPath = path.join(CREATIVES_DIR, creative.out);
-    console.log('exporting ' + creative.out + ' (' + creative.width + 'x' + creative.height + ')');
+    console.log('exporting ' + creative.out + ' (' + creative.width + 'x' + creative.height + ', ' + scale + 'x supersampled)');
     execFileSync(WKHTMLTOIMAGE, [
       '--enable-local-file-access',
-      '--width', String(creative.width),
-      '--height', String(creative.height),
+      '--width', String(creative.width * scale),
+      '--height', String(creative.height * scale),
+      '--zoom', String(scale),
       '--disable-smart-width',
       '--quality', '100',
       tmpHtmlPath,
-      outPath,
+      rawOutPath,
     ], { stdio: 'inherit' });
+
+    downscale(rawOutPath, outPath, creative.width, creative.height);
+    fs.rmSync(rawOutPath, { force: true });
+    tmpPaths.push(rawOutPath);
   });
 
   tmpPaths.forEach(function (p) { fs.rmSync(p, { force: true }); });
+}
+
+// No ImageMagick/sharp available in this environment — .NET System.Drawing
+// via a one-shot PowerShell invocation gives us high-quality bicubic
+// downscaling (supersampling) without adding a package dependency.
+function downscale(srcPath, destPath, width, height) {
+  const psScript = [
+    'Add-Type -AssemblyName System.Drawing',
+    '$src = [System.Drawing.Image]::FromFile(' + JSON.stringify(srcPath) + ')',
+    '$dest = New-Object System.Drawing.Bitmap(' + width + ', ' + height + ')',
+    '$dest.SetResolution($src.HorizontalResolution, $src.VerticalResolution)',
+    '$g = [System.Drawing.Graphics]::FromImage($dest)',
+    '$g.CompositingQuality = [System.Drawing.Drawing2D.CompositingQuality]::HighQuality',
+    '$g.InterpolationMode = [System.Drawing.Drawing2D.InterpolationMode]::HighQualityBicubic',
+    '$g.SmoothingMode = [System.Drawing.Drawing2D.SmoothingMode]::HighQuality',
+    '$g.PixelOffsetMode = [System.Drawing.Drawing2D.PixelOffsetMode]::HighQuality',
+    '$g.DrawImage($src, 0, 0, ' + width + ', ' + height + ')',
+    '$dest.Save(' + JSON.stringify(destPath) + ', [System.Drawing.Imaging.ImageFormat]::Png)',
+    '$g.Dispose(); $dest.Dispose(); $src.Dispose()',
+  ].join('; ');
+  execFileSync('powershell.exe', ['-NoProfile', '-NonInteractive', '-Command', psScript], { stdio: 'inherit' });
 }
 
 main();

@@ -1,0 +1,149 @@
+/*
+  pdf.css — shared print stylesheet for the 3 write-up PDFs.
+
+  One stylesheet so all 3 documents share header treatment, type scale,
+  and margins by construction (edit once, all 3 stay consistent) rather
+  than 3 independently-tuned <style> blocks that happen to look alike.
+  Reads tokens.css for color/font values, same rule the live flow and
+  creatives follow — no hardcoded hex/font values in here.
+*/
+
+@page {
+  size: A4 portrait;
+  margin: 16mm 18mm;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: #FFFFFF; /* print surface: tokens.css's warm --color-bg is a
+    screen choice (docs/write-up-pdf-spec.md); plain white reads cleaner
+    on a printed/exported page and matches --color-surface anyway. */
+  color: var(--color-text);
+  font-family: var(--font-family);
+  font-size: 10.5pt;
+  line-height: 1.48;
+}
+
+header.doc-header {
+  border-bottom: 2px solid var(--color-primary);
+  padding-bottom: 6pt;
+  margin-bottom: 10pt;
+}
+
+/* table/table-cell, not flexbox: wkhtmltopdf's print rendering path
+   (distinct from its wkhtmltoimage screenshot path, verified separately)
+   silently ignores flex and stacks children instead — same old-WebKit
+   flex bug creatives/creative-320x50.html already works around with this
+   same box-model pattern. */
+.brand-lockup {
+  display: table;
+  border-collapse: collapse;
+}
+
+.brand-lockup .icon-cell,
+.brand-lockup .word-cell {
+  display: table-cell;
+  vertical-align: middle;
+}
+
+.brand-lockup .icon-cell { padding-right: 2pt; }
+
+.brand-lockup svg { width: 15pt; height: 15pt; display: block; }
+.brand-lockup svg .icon-fill { fill: var(--color-primary); }
+
+.brand-lockup .wordmark {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 12pt;
+  color: var(--color-text);
+  letter-spacing: 0.2pt;
+}
+
+.doc-header .doc-title {
+  font-family: var(--font-heading);
+  font-weight: 500;
+  font-size: 13.5pt;
+  color: var(--color-text);
+  margin-top: 4pt;
+}
+
+h2 {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 11.5pt;
+  color: var(--color-primary);
+  margin: 12pt 0 4pt;
+  padding-bottom: 1pt;
+  border-bottom: 1px solid var(--color-border);
+}
+
+h2:first-of-type { margin-top: 0; }
+
+h3 {
+  font-family: var(--font-heading);
+  font-weight: 500;
+  font-size: 10.5pt;
+  color: var(--color-text);
+  margin: 6pt 0 2pt;
+}
+
+p { margin: 0 0 7pt; text-align: left; }
+
+.lead { font-weight: 600; }
+
+ul, ol { margin: 3pt 0 5pt; padding-left: 14pt; }
+li { margin-bottom: 2pt; }
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 4pt 0 6pt;
+  font-size: 9.5pt;
+}
+
+th, td {
+  border: 1px solid var(--color-border);
+  padding: 3pt 5pt;
+  text-align: left;
+}
+
+th {
+  background: var(--color-primary-soft);
+  color: var(--color-text);
+  font-family: var(--font-heading);
+  font-weight: 500;
+}
+
+.test-block {
+  margin-bottom: 9pt;
+  padding-left: 12pt;
+  border-left: 2px solid var(--color-primary-soft);
+}
+
+/* Pull the heading back out to the block's left edge (flush with the
+   border) — only the KPI lines and body paragraph should sit indented
+   under it, not the heading itself. */
+.test-block h3 { margin: 0 0 5pt -12pt; }
+
+/* The body <p> sits between two .kpi-line rows (funnel-step above,
+   Primary/Guardrail KPI below) — give it its own top margin so it reads
+   as a distinct paragraph, not a continuation of the kpi-line above it. */
+.test-block p:not(.kpi-line) { margin-top: 4pt; }
+
+.kpi-line { font-size: 9.5pt; color: var(--color-text-muted); }
+.kpi-line strong { color: var(--color-text); font-weight: 600; }
+
+footer.doc-footer {
+  position: fixed;
+  bottom: -12mm;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-size: 8pt;
+  color: var(--color-text-muted);
+  border-top: 1px solid var(--color-border);
+  padding-top: 3pt;
+}

@@ -241,7 +241,10 @@
   padding: var(--space-3) var(--space-4);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
-  background: var(--color-bg);
+  /* --color-surface (white), not --color-bg (the page's own off-white) —
+     the field needs to read as a distinct control against the page, not
+     blend into it. */
+  background: var(--color-surface);
   color: var(--color-text);
 }
 
@@ -501,6 +504,26 @@
 
 .trust-badge {
   font-size: var(--font-size-sm);
+  text-align: center;
+}
+
+/* Standalone email gate (mid-quiz Test 1, or full-reveal-before-result) —
+   no score/curve exists yet, so the content block is vertically centered
+   instead of anchored at the top with dead space below it. */
+.screen-email-gate {
+  justify-content: center;
+}
+
+.gate-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.gate-momentum {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
   text-align: center;
 }
 

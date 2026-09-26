@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>IQly — Part 2 Write-up</title>
+<link rel="stylesheet" href="../../styles/tokens.css">
+<link rel="stylesheet" href="./pdf.css">
+</head>
+<body>
+
+<header class="doc-header">
+  <div class="brand-lockup">
+    <div class="icon-cell">
+      <svg viewBox="0 0 64 64" aria-hidden="true">
+        <path d="M32 6 C21 6 15 13 17 21 C8 23 6 33 15 37 C13 45 21 53 30 51 C31 56 33 56 34 51 C43 53 51 45 49 37 C58 33 56 23 47 21 C49 13 43 6 32 6 Z" class="icon-fill"/>
+        <path d="M32 9 C30.5 20 30.5 44 32 53" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <div class="word-cell"><span class="wordmark">IQly</span></div>
+  </div>
+  <div class="doc-title">Part 2 — A/B Test Ideation: Write-up</div>
+</header>
+
+<p>All three tests target the funnel's highest-leverage steps, identified in the Part 1 funnel model (Result→Account: +4.3pp per 10pp improved; Quiz start→Complete: +2.8pp). Each isolates exactly one variable against the Part 1 baseline (control).</p>
+
+<div class="test-block">
+<h3>Test 1 — Email Gate Timing <span class="kpi-line">(<code>variant-1-gate-after-q4.html</code>)</span></h3>
+<p class="kpi-line"><strong>Funnel step:</strong> Quiz progress → Account creation</p>
+<p>Moving the email gate from after Q8 to after Q4 tests whether mid-quiz sunk-cost investment increases signup rate more than asking after full completion. The competing risk is real: interrupting quiz momentum at its peak could break flow and increase abandonment instead of reducing it — which is exactly why this is tested rather than assumed.</p>
+<p class="kpi-line"><strong>Primary KPI:</strong> gate-reached → account-created rate, compared to control's Result→Account rate.<br><strong>Guardrail KPI:</strong> drop-off in the two questions immediately following the gate — if this rises alongside the primary metric, the sunk-cost effect is likely masking a flow-break rather than confirming the hypothesis cleanly.</p>
+</div>
+
+<div class="test-block">
+<h3>Test 2 — Quiz Length <span class="kpi-line">(<code>variant-2-shorter-quiz.html</code>)</span></h3>
+<p class="kpi-line"><strong>Funnel step:</strong> Quiz start → Completion</p>
+<p>Reducing the quiz from 8 to 5 questions tests whether a shorter time commitment increases completion rate enough to offset any drop in perceived result depth — fewer data points behind the category breakdown could make the result feel "thinner" and less worth converting on. Questions are drawn proportionally across all five categories (not simply the first five), so the shorter version still produces a complete category breakdown.</p>
+<p class="kpi-line"><strong>Primary KPI:</strong> quiz start → completion rate.<br><strong>Guardrail KPI:</strong> result → account-created rate, to confirm a completion-rate gain doesn't come at the cost of conversion in the very next step.</p>
+</div>
+
+<div class="test-block">
+<h3>Test 3 — Result Framing <span class="kpi-line">(<code>variant-3-percentile-framing.html</code>)</span></h3>
+<p class="kpi-line"><strong>Funnel step:</strong> Result shown → Account creation</p>
+<p>The baseline partial-result screen leads with personal insight ("Your Standout Strength: Pattern Recognition"). This variant leads with competitive standing instead ("Your Ranking — higher than most test-takers"). These appeal to different motivations — self-understanding vs. social comparison — and it's unclear which resonates more with a "free iq test" search audience, who may be driven primarily by curiosity about relative standing rather than self-insight.</p>
+<p class="kpi-line"><strong>Primary KPI:</strong> result → account-created rate (same gate, different framing before it).<br><strong>Guardrail KPI:</strong> time-on-screen before click, as a qualitative signal distinguishing engaged consideration from impulsive action — useful context for interpreting the primary metric whichever way it moves. Whichever framing wins should also inform Part 3 creative copy, since the two speak to the same underlying value proposition from different angles.</p>
+</div>
+
+<h2>Why not the other candidates</h2>
+<p>Two other levers were considered and cut: showing the full result before the gate (<code>revealMode: 'full'</code>) functionally overlaps Test 1 — both ultimately test "when do we ask for email relative to value delivered," and Test 1 is the cleaner version of that question. Removing the mid-quiz percentile toasts was deprioritized because it's a defensive test (confirms an existing mechanic isn't harmful) rather than an offensive one (could reveal a genuine improvement) — a weaker bet given only three test slots.</p>
+
+<footer class="doc-footer">IQly — AI Growth Builder Challenge — Part 2 of 3</footer>
+</body>
+</html>
